@@ -27,10 +27,10 @@ import edu.porgamdor.util.desktop.ambiente.Ambiente;
 @EnableTransactionManagement
 
 //NOVA CONFIGURAÇÃO
-@PropertySource(value = { "file:/cfip/conf/ambiente.properties" })
+@PropertySource(value = { "file:/tandera/config/ambiente.properties" })
 
-@ComponentScan(value = "edu.cfip.core.dao*")
-@EnableJpaRepositories(basePackages="edu.cfip.core.dao.springjpa")
+@ComponentScan(value = "com.tandera.core.dao*")
+@EnableJpaRepositories(basePackages="com.tandera.core.dao.springjpa")
 public class PersistenceConfig {
 	private static final String PERSISTENCE_UNIT = "PU_CFIP";
 	@Autowired
@@ -43,7 +43,7 @@ public class PersistenceConfig {
 		emf.setJpaVendorAdapter(jpaVendorApapter());
 		emf.setJpaProperties(getProperties());
 		emf.setPersistenceUnitName(PERSISTENCE_UNIT);
-		emf.setPackagesToScan("edu.cfip.core.model");
+		emf.setPackagesToScan("com.tandera.core.model*");
 		return emf;
 	}
 	@Bean
@@ -63,6 +63,8 @@ public class PersistenceConfig {
 		properties.put(AvailableSettings.HBM2DDL_AUTO, getValue(Ambiente.DB_DDL));
 		properties.put(AvailableSettings.DIALECT, getValue(Ambiente.DB_DIALECT));
 		properties.put(AvailableSettings.SHOW_SQL, getValue(Ambiente.DB_SHOWSQL));
+		properties.put(AvailableSettings.FORMAT_SQL,true);
+
 		return properties;
 	}
 	
