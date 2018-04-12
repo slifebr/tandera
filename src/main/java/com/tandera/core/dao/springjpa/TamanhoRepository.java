@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.tandera.core.model.Tamanho;
+import com.tandera.core.model.comercial.Tamanho;
 
 
 public interface TamanhoRepository extends JpaRepository <Tamanho, Integer> {

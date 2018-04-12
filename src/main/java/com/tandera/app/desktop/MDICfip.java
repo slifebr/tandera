@@ -10,6 +10,7 @@ import javax.swing.JSeparator;
 import org.hsqldb.util.DatabaseManagerSwing;
 import org.springframework.stereotype.Component;
 
+import com.tandera.app.desktop.comercial.FrmEstados;
 import com.tandera.app.desktop.comercial.FrmTamanhos;
 import com.tandera.app.spring.SpringDesktopApp;
 import com.tandera.core.model.Usuario;
@@ -83,9 +84,18 @@ public class MDICfip extends MDI {
 		mnTamanho.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ev) {
 				exibirTamanhos();
+			}	
+		});
+			
+		JMenuItem mnEstado = new JMenuItem("Estados");
+		mnEstado.setIcon(Imagem.png("cfip", "despesarapida"));
+		mnEstado.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ev) {
+				showFormulario(FrmEstados.class);
 			}
 		});
 		mnComercial.add(mnTamanho);
+		mnComercial.add(mnEstado);
        //Fim menu Comercial
 		
 		JMenu mnLancamentos = new JMenu("Lançamentos");
@@ -348,7 +358,15 @@ public class MDICfip extends MDI {
 	
 	private void exibirTamanhos() {
 		exibir((Formulario)SpringDesktopApp.getBean(FrmTamanhos.class));
-	}	
+	}
+	
+	private void exibirEstado() {
+		exibir((Formulario)SpringDesktopApp.getBean(FrmTamanhos.class));
+	} 
+	
+	private void showFormulario(Class form) {
+		exibir((Formulario)SpringDesktopApp.getBean(form));
+	}
 	private void sql() {
 		//http://www.avajava.com/tutorials/lessons/how-do-i-run-another-application-from-java.html
 		try {

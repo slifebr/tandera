@@ -14,26 +14,22 @@ import javax.swing.border.EtchedBorder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.tandera.core.dao.springjpa.TamanhoRepository;
-import com.tandera.core.model.Categoria;
-import com.tandera.core.model.Natureza;
-import com.tandera.core.model.TipoMovimento;
-import com.tandera.core.model.comercial.Tamanho;
+import com.tandera.core.dao.springjpa.EstadoRepository;
+import com.tandera.core.model.Estado;
 
 import edu.porgamdor.util.desktop.Formulario;
-import edu.porgamdor.util.desktop.MDI;
 import edu.porgamdor.util.desktop.ss.SSBotao;
 import edu.porgamdor.util.desktop.ss.SSCampoTexto;
 import edu.porgamdor.util.desktop.ss.SSMensagem;
 
 @Component
-public class FrmTamanho extends Formulario {
-
+public class FrmEstado extends Formulario {
+	
 	@Autowired
-	private TamanhoRepository dao;
-
-	private Tamanho entidade;
-
+	private EstadoRepository dao;
+	
+	private Estado entidade;
+	
 	private SSCampoTexto txtDescr = new SSCampoTexto();
 	private SSCampoTexto txtSigla = new SSCampoTexto();
 
@@ -41,13 +37,13 @@ public class FrmTamanho extends Formulario {
 	private SSBotao cmdSair = new SSBotao();
 	private JCheckBox chkNovo = new JCheckBox("Novo?");
 
-	public FrmTamanho() {
+	public FrmEstado() {
 		init();
 	}
-
+	
 	private void init() {
-		super.setTitulo("Tamanho");
-		super.setDescricao("Cadastro de Tamanho");
+		super.setTitulo("Estado");
+		super.setDescricao("Cadastro de Estado");
 		super.getRodape().add(chkNovo);
 		super.getRodape().add(cmdSalvar);
 		super.getRodape().add(cmdSair);
@@ -57,9 +53,7 @@ public class FrmTamanho extends Formulario {
 		panelCampos.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		GridBagLayout gbl_panelCampos = new GridBagLayout();
 		panelCampos.setLayout(gbl_panelCampos);
-
-
-
+		
 		GridBagConstraints gbcTxtDescr = new GridBagConstraints();
 		gbcTxtDescr.weightx = 2.0;
 		gbcTxtDescr.insets = new Insets(5, 5, 5, 5);
@@ -77,8 +71,7 @@ public class FrmTamanho extends Formulario {
 		gbcTxtSigla.gridx = 0;
 		gbcTxtSigla.gridy = 1;
 		txtSigla.setRotulo("Sigla");
-		panelCampos.add(txtSigla, gbcTxtSigla);		
-		
+		panelCampos.add(txtSigla, gbcTxtSigla);
 		
 		cmdSair.setText("Fechar");
 		cmdSalvar.setText("Salvar");
@@ -100,60 +93,55 @@ public class FrmTamanho extends Formulario {
 				});
 	}
 	//public void setEntidade(Natureza entidade) {
-		public void setEntidade(Object entidade) {
-			this.entidade = (Tamanho) entidade;
-			if (entidade != null)
-				atribuir();
-			else
-				criar();
-		}
-		private void atribuir() {
-			try {
-				txtDescr.setValue(entidade.getDescr());
-				txtSigla.setText(entidade.getSigla());
-				txtDescr.requestFocus();
-			} catch (Exception e) {
-				JOptionPane.showMessageDialog(null, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
-			}
-		}
-		private void criar() {
-			entidade = new Tamanho();
-			atribuir();
-		}
-		private void salvar() {
-			try {
-				entidade.setDescr(txtDescr.getText());
-				entidade.setSigla(txtSigla.getText());
-
-				if (entidade.getDescr() == null || entidade.getDescr().isEmpty() || entidade.getSigla() == null
-						|| entidade.getSigla().isEmpty() ) {
-					SSMensagem.avisa("Dados incompletos");
-					return;
-				}
-
-				
-				//dao.gravar(operacao, entidade);
-				dao.save(entidade);
-				/*
-				if(entidade.getId()==null)
-					dao.save(entidade);
+			public void setEntidade(Object entidade) {
+				this.entidade = (Estado) entidade;
+				if (entidade != null)
+					atribuir();
 				else
-					dao.alterar(entidade);
-				*/
-				SSMensagem.informa("Natureza registrado com sucesso!!");
-				novo();
-			} catch (Exception e) {
-				JOptionPane.showMessageDialog(null, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+					criar();
 			}
-		}
-		private void novo() {
-			if(chkNovo.isSelected()) {
-				criar();
-			}else
+			private void atribuir() {
+				try {
+					txtDescr.setValue(entidade.getDescr());
+					txtSigla.setText(entidade.getSigla());
+					txtDescr.requestFocus();
+				} catch (Exception e) {
+					JOptionPane.showMessageDialog(null, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+				}
+			}
+			private void criar() {
+				entidade = new Estado();
+				atribuir();
+			}
+			private void salvar() {
+				try {
+					entidade.setDescr(txtDescr.getText());
+					entidade.setSigla(txtSigla.getText());
+
+					if (entidade.getDescr() == null || entidade.getDescr().isEmpty() || entidade.getSigla() == null
+							|| entidade.getSigla().isEmpty() ) {
+						SSMensagem.avisa("Dados incompletos");
+						return;
+					}
+
+					
+					//dao.gravar(operacao, entidade);
+					dao.save(entidade);
+
+					SSMensagem.informa("Natureza registrado com sucesso!!");
+					novo();
+				} catch (Exception e) {
+					JOptionPane.showMessageDialog(null, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+				}
+			}
+			private void novo() {
+				if(chkNovo.isSelected()) {
+					criar();
+				}else
+					super.fechar();
+			}
+			private void sair() {
 				super.fechar();
-		}
-		private void sair() {
-			super.fechar();
-		}
-	
+			}
+
 }

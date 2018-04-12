@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 
 import com.tandera.app.spring.SpringDesktopApp;
 import com.tandera.core.dao.springjpa.TamanhoRepository;
-import com.tandera.core.model.Tamanho;
+import com.tandera.core.model.comercial.Tamanho;
 
 import edu.porgamdor.util.desktop.Formulario;
 import edu.porgamdor.util.desktop.FormularioConsulta;
@@ -120,7 +120,6 @@ public class FrmTamanhos extends FormularioConsulta {
 		
 		private void adicionarComponentesNoConteudo() {
 
-			
 			scroll.setViewportView(tabela);
 			
 			getConteudo().add(filtro,BorderLayout.NORTH);

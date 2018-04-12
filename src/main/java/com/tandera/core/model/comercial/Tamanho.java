@@ -1,4 +1,4 @@
-package com.tandera.core.model;
+package com.tandera.core.model.comercial;
 
 import java.io.Serializable;
 import java.util.Objects;

@@ -6,7 +6,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 import com.tandera.core.config.PersistenceConfig;
 import com.tandera.core.dao.springjpa.TamanhoRepository;
-import com.tandera.core.model.Tamanho;
+import com.tandera.core.model.comercial.Tamanho;
 
 public class Context {
 	public static void main(String[] args) {
