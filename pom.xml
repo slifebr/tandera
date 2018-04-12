@@ -6,6 +6,9 @@
 	<version>1.0</version>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.version>1.8</java.version>
+		
 		<springframework.version>4.3.0.RELEASE</springframework.version>
 		<hibernate.version>4.3.6.Final</hibernate.version>
 		<hsqldb.version>2.3.2</hsqldb.version>
@@ -13,7 +16,7 @@
 	</properties>
 	<dependencies>
 		<dependency>
-			<groupId>edu.porgamador</groupId>
+			<groupId>com.slifesys</groupId>
 			<artifactId>desktop-util</artifactId>
 			<version>1.0</version>
 		</dependency>
@@ -62,6 +65,14 @@
 			<artifactId>hibernate-entitymanager</artifactId>
 			<version>${hibernate.version}</version>
 		</dependency>
+		
+		<!--hibernate-validator -->
+		<dependency>
+		    <groupId>org.hibernate</groupId>
+		    <artifactId>hibernate-validator</artifactId>
+		    <version>5.1.2.Final</version>
+		</dependency>		
+		
 		<!-- Banco de dados -->
 		<dependency>
 			<groupId>org.hsqldb</groupId>
@@ -83,4 +94,16 @@
 			<version>1.2.17</version>
 		</dependency>
 	</dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.7.0</version>
+        <configuration>
+          <source>1.8</source>
+          <target>1.8</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build> 	
 </project>

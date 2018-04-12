@@ -5,7 +5,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 import com.tandera.app.desktop.FrmCfipLogin;
 import com.tandera.app.spring.config.AppConfig;
-import com.tandera.core.config.PersistenceConfigEstatico;
+import com.tandera.core.config.PersistenceConfig;
 
 import edu.porgamdor.util.desktop.DesktopApp;
 
@@ -27,7 +27,7 @@ public class SpringDesktopApp extends DesktopApp {
 	public static void main(String[] args) {
 		try {
 			if (DesktopApp.iniciarAplicacao()) {
-				context = new AnnotationConfigApplicationContext(AppConfig.class, PersistenceConfigEstatico.class);
+				context = new AnnotationConfigApplicationContext(AppConfig.class, PersistenceConfig.class);
 				FrmCfipLogin frm = context.getBean(FrmCfipLogin.class);
 				frm.exibir();
 			}
