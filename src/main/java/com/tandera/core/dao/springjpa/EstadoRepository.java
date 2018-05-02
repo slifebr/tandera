@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.tandera.core.model.Estado;
+import com.tandera.core.model.comercial.Estado;
 
 public interface EstadoRepository extends JpaRepository<Estado , Integer> {
 	
