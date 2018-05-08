@@ -14,10 +14,13 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import com.tandera.app.spring.SpringDesktopApp;
-import com.tandera.core.dao.springjpa.MarkupRepository;
-import com.tandera.core.model.comercial.Markup;
+import com.tandera.core.dao.springjpa.MascaraPrecoRepository;
+import com.tandera.core.model.comercial.MascaraPreco;
 
 import edu.porgamdor.util.desktop.Formulario;
 import edu.porgamdor.util.desktop.FormularioConsulta;
@@ -27,13 +30,14 @@ import edu.porgamdor.util.desktop.ss.SSGrade;
 import edu.porgamdor.util.desktop.ss.SSMensagem;
 import edu.porgamdor.util.desktop.ss.util.Validacao;
 
-
-public class FrmMarkups extends FormularioConsulta {
+@Component
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+public class FrmMascaraPrecos extends FormularioConsulta {
 
 	@Autowired
-	MarkupRepository dao;
+	MascaraPrecoRepository dao;
 
-	Class formInclusao = FrmMarkup.class;
+	Class formInclusao = FrmMascaraPreco.class;
 
 	// JA PODERIA VIR DE FormularioConsulta
 	private JPanel filtro = new JPanel();
@@ -47,10 +51,10 @@ public class FrmMarkups extends FormularioConsulta {
 	private SSBotao cmdAlterar = new SSBotao();
 	private SSBotao cmdFechar = new SSBotao();
 
-	public FrmMarkups() {
+	public FrmMascaraPrecos() {
 		// JA PODERIA VIR DE FormularioConsulta
-		setTitulo("Consulta de Markups");
-		setDescricao("Listagem dos Markups");
+		setTitulo("Consulta de Mascara de Preço");
+		setDescricao("Listagem das Mascaras de Preços");
 		setConteudoLayout(new BorderLayout());
 		setAlinhamentoRodape(FlowLayout.LEFT);
 		filtro.setLayout(new GridBagLayout());
@@ -63,7 +67,7 @@ public class FrmMarkups extends FormularioConsulta {
 	}
 
 	private void configurarCamposPesquisa() {
-		txtFiltro.setRotulo("Sigla");
+		txtFiltro.setRotulo("Mascara");
 		txtFiltro.setColunas(50);
 		cmdBuscar.setText("Buscar");
 
@@ -78,7 +82,7 @@ public class FrmMarkups extends FormularioConsulta {
 		// campos da tabela
 		// BASICAMENTE O QUE VC TERÁ QUE MUDAR ENTRE FORMULARIOS
 		tabela.getModeloTabela().addColumn("Id");
-		tabela.getModeloTabela().addColumn("Sigla");
+		tabela.getModeloTabela().addColumn("Mascara");
 		tabela.getModeloTabela().addColumn("Valor");
 
 		tabela.getModeloColuna().getColumn(0).setPreferredWidth(30);
@@ -86,7 +90,7 @@ public class FrmMarkups extends FormularioConsulta {
 		tabela.getModeloColuna().getColumn(2).setPreferredWidth(70);
 
 		tabela.getModeloColuna().setCampo(0, "id");
-		tabela.getModeloColuna().setCampo(1, "sigla");
+		tabela.getModeloColuna().setCampo(1, "mascara");
 		tabela.getModeloColuna().setCampo(2, "valor");
 
 	}
@@ -158,14 +162,14 @@ public class FrmMarkups extends FormularioConsulta {
 	}
 
 	private void listar() {
-		List<Markup> lista = new ArrayList<Markup>();
+		List<MascaraPreco> lista = new ArrayList<MascaraPreco>();
 		try {
-			String sigla = txtFiltro.getText();
-			if (Validacao.vazio(sigla)) {
+			String mascara = txtFiltro.getText();
+			if (Validacao.vazio(mascara)) {
 				lista = dao.findAll();
 
 			} else {
-				lista = dao.findBySiglaContainingIgnoreCase(sigla);
+				lista = dao.findByDescrContainingIgnoreCase(mascara);
 			}
 			if (lista.size() == 0)
 				SSMensagem.avisa("Nenhum dado encontrado");
@@ -182,7 +186,7 @@ public class FrmMarkups extends FormularioConsulta {
 	}
 
 	private void alterar() {
-		Markup entidade = (Markup) tabela.getLinhaSelecionada();
+		MascaraPreco entidade = (MascaraPreco) tabela.getLinhaSelecionada();
 		if (entidade == null) {
 			SSMensagem.avisa("Selecione um item da lista");
 			return;
@@ -190,7 +194,7 @@ public class FrmMarkups extends FormularioConsulta {
 		exibirCadastro(entidade);
 	}
 
-	private void exibirCadastro(Markup entidade) {
+	private void exibirCadastro(MascaraPreco entidade) {
 		Formulario frm = SpringDesktopApp.getBean(formInclusao);
 		frm.setEntidade(entidade);
 		this.exibir(frm);

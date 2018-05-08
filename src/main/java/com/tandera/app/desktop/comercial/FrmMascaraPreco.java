@@ -15,8 +15,8 @@ import javax.swing.border.EtchedBorder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.tandera.core.dao.springjpa.MarkupRepository;
-import com.tandera.core.model.comercial.Markup;
+import com.tandera.core.dao.springjpa.MascaraPrecoRepository;
+import com.tandera.core.model.comercial.MascaraPreco;
 
 import edu.porgamdor.util.desktop.Formato;
 import edu.porgamdor.util.desktop.Formulario;
@@ -24,29 +24,29 @@ import edu.porgamdor.util.desktop.ss.SSBotao;
 import edu.porgamdor.util.desktop.ss.SSCampoNumero;
 import edu.porgamdor.util.desktop.ss.SSCampoTexto;
 import edu.porgamdor.util.desktop.ss.SSMensagem;
-import edu.porgamdor.util.desktop.ss.util.Formatador;
 
-public class FrmMarkup extends Formulario {
+@Component
+public class FrmMascaraPreco extends Formulario {
 
 	@Autowired
-	private MarkupRepository dao;
+	private MascaraPrecoRepository dao;
 
-	private Markup entidade;
+	private MascaraPreco entidade;
 
-	private SSCampoTexto txtSigla = new SSCampoTexto();
+	private SSCampoTexto txtMascara = new SSCampoTexto();
 	private SSCampoNumero txtValor = new SSCampoNumero();
 
 	private SSBotao cmdSalvar = new SSBotao();
 	private SSBotao cmdSair = new SSBotao();
 	private JCheckBox chkNovo = new JCheckBox("Novo?");
 
-	public FrmMarkup() {
+	public FrmMascaraPreco() {
 		init();
 	}
 
 	private void init() {
-		super.setTitulo("Markup");
-		super.setDescricao("Cadastro de Markup");
+		super.setTitulo("Mascara Preço");
+		super.setDescricao("Cadastro de Mascara de Preço");
 		super.getRodape().add(chkNovo);
 		super.getRodape().add(cmdSalvar);
 		super.getRodape().add(cmdSair);
@@ -57,16 +57,16 @@ public class FrmMarkup extends Formulario {
 		GridBagLayout gbl_panelCampos = new GridBagLayout();
 		panelCampos.setLayout(gbl_panelCampos);
 
-		GridBagConstraints gbcTxtSigla = new GridBagConstraints();
-		gbcTxtSigla.weightx = 2.0;
-		gbcTxtSigla.insets = new Insets(5, 5, 5, 5);
-		gbcTxtSigla.fill = GridBagConstraints.HORIZONTAL;
-		gbcTxtSigla.gridx = 0;
-		gbcTxtSigla.gridy = 0;
-		panelCampos.add(txtSigla, gbcTxtSigla);
+		GridBagConstraints gbcTxtMascara = new GridBagConstraints();
+		gbcTxtMascara.weightx = 2.0;
+		gbcTxtMascara.insets = new Insets(5, 5, 5, 5);
+		gbcTxtMascara.fill = GridBagConstraints.HORIZONTAL;
+		gbcTxtMascara.gridx = 0;
+		gbcTxtMascara.gridy = 0;
+		panelCampos.add(txtMascara, gbcTxtMascara);
 
-		txtSigla.setColunas(10);
-		txtSigla.setRotulo("Sigla");
+		txtMascara.setColunas(10);
+		txtMascara.setRotulo("Mascara");
 
 		GridBagConstraints gbcTxtValor = new GridBagConstraints();
 		gbcTxtValor.insets = new Insets(5, 5, 0, 5);
@@ -99,7 +99,7 @@ public class FrmMarkup extends Formulario {
 
 	// public void setEntidade(Natureza entidade) {
 	public void setEntidade(Object entidade) {
-		this.entidade = (Markup) entidade;
+		this.entidade = (MascaraPreco) entidade;
 		if (entidade != null)
 			atribuir();
 		else
@@ -108,25 +108,25 @@ public class FrmMarkup extends Formulario {
 
 	private void atribuir() {
 		try {
-			txtSigla.setValue(entidade.getSigla());
+			txtMascara.setValue(entidade.getMascara());
 			txtValor.setValue(entidade.getValor());
-			txtSigla.requestFocus();
+			txtMascara.requestFocus();
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(null, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
 		}
 	}
 
 	private void criar() {
-		entidade = new Markup();
+		entidade = new MascaraPreco();
 		atribuir();
 	}
 
 	private void salvar() {
 		try {
-			entidade.setSigla(txtSigla.getText());
+			entidade.setMascara(txtMascara.getText());
 			entidade.setValor(BigDecimal.valueOf(txtValor.getDouble()));
 
-			if (entidade.getSigla() == null || entidade.getSigla().isEmpty() || entidade.getValor() == null
+			if (entidade.getMascara() == null || entidade.getMascara().isEmpty() || entidade.getValor() == null
 					|| entidade.getValor().equals(BigDecimal.ZERO)) {
 				SSMensagem.avisa("Dados incompletos");
 				return;

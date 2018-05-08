@@ -12,7 +12,9 @@ import org.springframework.stereotype.Component;
 
 import com.tandera.app.desktop.comercial.FrmEstados;
 import com.tandera.app.desktop.comercial.FrmMarkups;
+import com.tandera.app.desktop.comercial.FrmMascaraPrecos;
 import com.tandera.app.desktop.comercial.FrmTamanhos;
+import com.tandera.app.desktop.comercial.FrmTipos;
 import com.tandera.app.spring.SpringDesktopApp;
 import com.tandera.core.model.Usuario;
 
@@ -95,6 +97,7 @@ public class MDICfip extends MDI {
 				showFormulario(FrmEstados.class);
 			}
 		});
+		
 		JMenuItem mnMarkup = new JMenuItem("Markup");
 		mnMarkup.setIcon(Imagem.png("cfip", "despesarapida"));
 		mnMarkup.addActionListener(new ActionListener() {
@@ -102,9 +105,28 @@ public class MDICfip extends MDI {
 				showFormulario(FrmMarkups.class);
 			}
 		});
+		
+		JMenuItem mnTipo = new JMenuItem("Tipo");
+		mnTipo.setIcon(Imagem.png("cfip", "despesarapida"));
+		mnTipo.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ev) {
+				showFormulario(FrmTipos.class);
+			}
+		});
+		
+		JMenuItem mnMascaraPreco = new JMenuItem("Mascara Preço");
+		mnMascaraPreco.setIcon(Imagem.png("cfip", "despesarapida"));
+		mnMascaraPreco.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ev) {
+				showFormulario(FrmMascaraPrecos.class);
+			}
+		});
+		
 		mnComercial.add(mnTamanho);
 		mnComercial.add(mnEstado);
 		mnComercial.add(mnMarkup);
+		mnComercial.add(mnTipo);
+		mnComercial.add(mnMascaraPreco);
        //Fim menu Comercial
 		
 		JMenu mnLancamentos = new JMenu("Lançamentos");
