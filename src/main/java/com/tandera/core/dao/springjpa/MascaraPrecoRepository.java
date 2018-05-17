@@ -8,7 +8,7 @@ import com.tandera.core.model.comercial.MascaraPreco;
 
 public interface MascaraPrecoRepository extends JpaRepository<MascaraPreco, Integer> {
 
-	public List<MascaraPreco> findByDescrContainingIgnoreCase(String mascara);
+	public List<MascaraPreco> findByMascaraContainingIgnoreCase(String mascara);
 
 	public MascaraPreco findById(Integer id);
 

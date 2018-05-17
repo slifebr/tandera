@@ -19,8 +19,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.tandera.app.spring.SpringDesktopApp;
-import com.tandera.core.dao.springjpa.MascaraPrecoRepository;
-import com.tandera.core.model.comercial.MascaraPreco;
+import com.tandera.core.dao.springjpa.MarcaRepository;
+import com.tandera.core.model.comercial.Marca;
 
 import edu.porgamdor.util.desktop.Formulario;
 import edu.porgamdor.util.desktop.FormularioConsulta;
@@ -32,13 +32,13 @@ import edu.porgamdor.util.desktop.ss.util.Validacao;
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class FrmMascaraPrecos extends FormularioConsulta {
-
+public class FrmMarcas extends FormularioConsulta {
+	
 	@Autowired
-	MascaraPrecoRepository dao;
+	MarcaRepository dao;
 
-	Class formInclusao = FrmMascaraPreco.class;
-
+	Class formInclusao = FrmMarca.class;
+	
 	// JA PODERIA VIR DE FormularioConsulta
 	private JPanel filtro = new JPanel();
 	private JScrollPane scroll = new JScrollPane();
@@ -51,10 +51,10 @@ public class FrmMascaraPrecos extends FormularioConsulta {
 	private SSBotao cmdAlterar = new SSBotao();
 	private SSBotao cmdFechar = new SSBotao();
 
-	public FrmMascaraPrecos() {
+	public FrmMarcas() {
 		// JA PODERIA VIR DE FormularioConsulta
-		setTitulo("Consulta de Mascara de Preço");
-		setDescricao("Listagem das Mascaras de Preços");
+		setTitulo("Consulta de Marcas");
+		setDescricao("Listagem das Marcas");
 		setConteudoLayout(new BorderLayout());
 		setAlinhamentoRodape(FlowLayout.LEFT);
 		filtro.setLayout(new GridBagLayout());
@@ -67,7 +67,7 @@ public class FrmMascaraPrecos extends FormularioConsulta {
 	}
 
 	private void configurarCamposPesquisa() {
-		txtFiltro.setRotulo("Mascara");
+		txtFiltro.setRotulo("Descrição");
 		txtFiltro.setColunas(50);
 		cmdBuscar.setText("Buscar");
 
@@ -82,16 +82,13 @@ public class FrmMascaraPrecos extends FormularioConsulta {
 		// campos da tabela
 		// BASICAMENTE O QUE VC TERÁ QUE MUDAR ENTRE FORMULARIOS
 		tabela.getModeloTabela().addColumn("Id");
-		tabela.getModeloTabela().addColumn("Mascara");
-		tabela.getModeloTabela().addColumn("Valor");
+		tabela.getModeloTabela().addColumn("Descrição");
 
 		tabela.getModeloColuna().getColumn(0).setPreferredWidth(30);
-		tabela.getModeloColuna().getColumn(1).setPreferredWidth(250);
-		tabela.getModeloColuna().getColumn(2).setPreferredWidth(70);
+		tabela.getModeloColuna().getColumn(1).setPreferredWidth(320);
 
 		tabela.getModeloColuna().setCampo(0, "id");
-		tabela.getModeloColuna().setCampo(1, "mascara");
-		tabela.getModeloColuna().setCampo(2, "valor");
+		tabela.getModeloColuna().setCampo(1, "descr");
 
 	}
 
@@ -162,14 +159,14 @@ public class FrmMascaraPrecos extends FormularioConsulta {
 	}
 
 	private void listar() {
-		List<MascaraPreco> lista = new ArrayList<MascaraPreco>();
+		List<Marca> lista = new ArrayList<Marca>();
 		try {
-			String mascara = txtFiltro.getText();
-			if (Validacao.vazio(mascara)) {
+			String descr = txtFiltro.getText();
+			if (Validacao.vazio(descr)) {
 				lista = dao.findAll();
 
 			} else {
-				lista = dao.findByMascaraContainingIgnoreCase(mascara);
+				lista = dao.findByDescrContainingIgnoreCase(descr);
 			}
 			if (lista.size() == 0)
 				SSMensagem.avisa("Nenhum dado encontrado");
@@ -186,7 +183,7 @@ public class FrmMascaraPrecos extends FormularioConsulta {
 	}
 
 	private void alterar() {
-		MascaraPreco entidade = (MascaraPreco) tabela.getLinhaSelecionada();
+		Marca entidade = (Marca) tabela.getLinhaSelecionada();
 		if (entidade == null) {
 			SSMensagem.avisa("Selecione um item da lista");
 			return;
@@ -194,7 +191,7 @@ public class FrmMascaraPrecos extends FormularioConsulta {
 		exibirCadastro(entidade);
 	}
 
-	private void exibirCadastro(MascaraPreco entidade) {
+	private void exibirCadastro(Marca entidade) {
 		Formulario frm = SpringDesktopApp.getBean(formInclusao);
 		frm.setEntidade(entidade);
 		this.exibir(frm);

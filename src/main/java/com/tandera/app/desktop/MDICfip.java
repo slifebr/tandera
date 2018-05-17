@@ -10,7 +10,9 @@ import javax.swing.JSeparator;
 import org.hsqldb.util.DatabaseManagerSwing;
 import org.springframework.stereotype.Component;
 
+import com.tandera.app.desktop.cadastro.FrmPessoas;
 import com.tandera.app.desktop.comercial.FrmEstados;
+import com.tandera.app.desktop.comercial.FrmMarcas;
 import com.tandera.app.desktop.comercial.FrmMarkups;
 import com.tandera.app.desktop.comercial.FrmMascaraPrecos;
 import com.tandera.app.desktop.comercial.FrmTamanhos;
@@ -39,7 +41,7 @@ public class MDICfip extends MDI {
 				//exibirBean("frmContas");
 			}
 		});
-		mnCadastros.add(mnConta);
+		//mnCadastros.add(mnConta);
 
 		JMenuItem mnNatureza = new JMenuItem("Natureza");
 		mnNatureza.setIcon(Imagem.png("cfip", "natureza"));
@@ -49,7 +51,7 @@ public class MDICfip extends MDI {
 			}
 		});
 
-		mnCadastros.add(mnNatureza);
+		//mnCadastros.add(mnNatureza);
 
 		JMenuItem mnDespesasRapidas = new JMenuItem("Despesa Rápida");
 		mnDespesasRapidas.setIcon(Imagem.png("cfip", "despesarapida"));
@@ -58,7 +60,7 @@ public class MDICfip extends MDI {
 				exibirDespesasRapidas();
 			}
 		});
-		mnCadastros.add(mnDespesasRapidas);
+		//mnCadastros.add(mnDespesasRapidas);
 		
 		JMenuItem mntmContato = new JMenuItem("Contato");
 		mntmContato.setIcon(Imagem.png("cfip", "contato"));
@@ -76,7 +78,17 @@ public class MDICfip extends MDI {
 			}
 		});
 		//mnCadastros.add(mntmFatura);
-		mnCadastros.add(mntmContato);
+		//mnCadastros.add(mntmContato);
+		
+		JMenuItem mnPessoa = new JMenuItem("Cadastro de Pessoas");
+		mnPessoa.setIcon(Imagem.png("cfip", "despesarapida"));
+		mnPessoa.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ev) {
+				showFormulario(FrmPessoas.class);
+			}
+		});
+		
+		mnCadastros.add(mnPessoa);
 		
 		//menu comercial
 		JMenu mnComercial = new JMenu("Comercial");
@@ -122,11 +134,20 @@ public class MDICfip extends MDI {
 			}
 		});
 		
+		JMenuItem mnMarca = new JMenuItem("Marca");
+		mnMarca.setIcon(Imagem.png("cfip", "despesarapida"));
+		mnMarca.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ev) {
+				showFormulario(FrmMarcas.class);
+			}
+		});
+		
 		mnComercial.add(mnTamanho);
 		mnComercial.add(mnEstado);
 		mnComercial.add(mnMarkup);
 		mnComercial.add(mnTipo);
 		mnComercial.add(mnMascaraPreco);
+		mnComercial.add(mnMarca);
        //Fim menu Comercial
 		
 		JMenu mnLancamentos = new JMenu("Lançamentos");
@@ -319,8 +340,8 @@ public class MDICfip extends MDI {
 				exibirBackup();
 			}
 		});
-		//getBarraMenu().add(mnCadastros);
-		getBarraMenu().add(mnComercial);		
+		getBarraMenu().add(mnCadastros);
+		getBarraMenu().add(mnComercial);
 		//getBarraMenu().add(mnLancamentos);
 		//getBarraMenu().add(mnConsultas);
 		//getBarraMenu().add(mnRelatorios);
