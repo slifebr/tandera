@@ -19,8 +19,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.tandera.app.spring.SpringDesktopApp;
-import com.tandera.core.dao.springjpa.EstadoRepository;
-import com.tandera.core.model.comercial.Estado;
+import com.tandera.core.dao.springjpa.TipoRepository;
+import com.tandera.core.model.comercial.Tipo;
 
 import edu.porgamdor.util.desktop.Formulario;
 import edu.porgamdor.util.desktop.FormularioConsulta;
@@ -32,13 +32,13 @@ import edu.porgamdor.util.desktop.ss.util.Validacao;
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class FrmEstados extends FormularioConsulta {
+public class FrmTipos extends FormularioConsulta {
 
 	@Autowired
-	EstadoRepository dao;
+	TipoRepository dao;
 
-	Class formInclusao = FrmEstado.class;
-	
+	Class formInclusao = FrmTipo.class;
+
 	// JA PODERIA VIR DE FormularioConsulta
 	private JPanel filtro = new JPanel();
 	private JScrollPane scroll = new JScrollPane();
@@ -51,10 +51,10 @@ public class FrmEstados extends FormularioConsulta {
 	private SSBotao cmdAlterar = new SSBotao();
 	private SSBotao cmdFechar = new SSBotao();
 
-	public FrmEstados() {
+	public FrmTipos() {
 		// JA PODERIA VIR DE FormularioConsulta
-		setTitulo("Consulta de Estados");
-		setDescricao("Listagem dos Estados");
+		setTitulo("Consulta de Tipos");
+		setDescricao("Listagem dos Tipos");
 		setConteudoLayout(new BorderLayout());
 		setAlinhamentoRodape(FlowLayout.LEFT);
 		filtro.setLayout(new GridBagLayout());
@@ -83,7 +83,7 @@ public class FrmEstados extends FormularioConsulta {
 		// BASICAMENTE O QUE VC TERÁ QUE MUDAR ENTRE FORMULARIOS
 		tabela.getModeloTabela().addColumn("Id");
 		tabela.getModeloTabela().addColumn("Descrição");
-		tabela.getModeloTabela().addColumn("Sigla");
+		tabela.getModeloTabela().addColumn("Fator");
 
 		tabela.getModeloColuna().getColumn(0).setPreferredWidth(30);
 		tabela.getModeloColuna().getColumn(1).setPreferredWidth(250);
@@ -91,7 +91,7 @@ public class FrmEstados extends FormularioConsulta {
 
 		tabela.getModeloColuna().setCampo(0, "id");
 		tabela.getModeloColuna().setCampo(1, "descr");
-		tabela.getModeloColuna().setCampo(2, "sigla");
+		tabela.getModeloColuna().setCampo(2, "fator");
 
 	}
 
@@ -162,7 +162,7 @@ public class FrmEstados extends FormularioConsulta {
 	}
 
 	private void listar() {
-		List<Estado> lista = new ArrayList<Estado>();
+		List<Tipo> lista = new ArrayList<Tipo>();
 		try {
 			String descr = txtFiltro.getText();
 			if (Validacao.vazio(descr)) {
@@ -186,7 +186,7 @@ public class FrmEstados extends FormularioConsulta {
 	}
 
 	private void alterar() {
-		Estado entidade = (Estado) tabela.getLinhaSelecionada();
+		Tipo entidade = (Tipo) tabela.getLinhaSelecionada();
 		if (entidade == null) {
 			SSMensagem.avisa("Selecione um item da lista");
 			return;
@@ -194,7 +194,7 @@ public class FrmEstados extends FormularioConsulta {
 		exibirCadastro(entidade);
 	}
 
-	private void exibirCadastro(Estado entidade) {
+	private void exibirCadastro(Tipo entidade) {
 		Formulario frm = SpringDesktopApp.getBean(formInclusao);
 		frm.setEntidade(entidade);
 		this.exibir(frm);

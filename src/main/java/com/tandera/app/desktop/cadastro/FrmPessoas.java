@@ -1,4 +1,4 @@
-package com.tandera.app.desktop.comercial;
+package com.tandera.app.desktop.cadastro;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -19,8 +19,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.tandera.app.spring.SpringDesktopApp;
-import com.tandera.core.dao.springjpa.EstadoRepository;
-import com.tandera.core.model.comercial.Estado;
+import com.tandera.core.dao.springjpa.PessoaRepository;
+import com.tandera.core.model.cadastro.Pessoa;
 
 import edu.porgamdor.util.desktop.Formulario;
 import edu.porgamdor.util.desktop.FormularioConsulta;
@@ -32,13 +32,13 @@ import edu.porgamdor.util.desktop.ss.util.Validacao;
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class FrmEstados extends FormularioConsulta {
-
-	@Autowired
-	EstadoRepository dao;
-
-	Class formInclusao = FrmEstado.class;
+public class FrmPessoas extends FormularioConsulta {
 	
+	@Autowired
+	PessoaRepository dao;
+
+	Class formInclusao = FrmPessoa.class;
+
 	// JA PODERIA VIR DE FormularioConsulta
 	private JPanel filtro = new JPanel();
 	private JScrollPane scroll = new JScrollPane();
@@ -51,10 +51,10 @@ public class FrmEstados extends FormularioConsulta {
 	private SSBotao cmdAlterar = new SSBotao();
 	private SSBotao cmdFechar = new SSBotao();
 
-	public FrmEstados() {
+	public FrmPessoas() {
 		// JA PODERIA VIR DE FormularioConsulta
-		setTitulo("Consulta de Estados");
-		setDescricao("Listagem dos Estados");
+		setTitulo("Consulta de Pessoas");
+		setDescricao("Listagem das Pessoas");
 		setConteudoLayout(new BorderLayout());
 		setAlinhamentoRodape(FlowLayout.LEFT);
 		filtro.setLayout(new GridBagLayout());
@@ -67,7 +67,7 @@ public class FrmEstados extends FormularioConsulta {
 	}
 
 	private void configurarCamposPesquisa() {
-		txtFiltro.setRotulo("Descrição");
+		txtFiltro.setRotulo("Nome");
 		txtFiltro.setColunas(50);
 		cmdBuscar.setText("Buscar");
 
@@ -82,16 +82,16 @@ public class FrmEstados extends FormularioConsulta {
 		// campos da tabela
 		// BASICAMENTE O QUE VC TERÁ QUE MUDAR ENTRE FORMULARIOS
 		tabela.getModeloTabela().addColumn("Id");
-		tabela.getModeloTabela().addColumn("Descrição");
-		tabela.getModeloTabela().addColumn("Sigla");
+		tabela.getModeloTabela().addColumn("Nome");
+		tabela.getModeloTabela().addColumn("CPF");
 
 		tabela.getModeloColuna().getColumn(0).setPreferredWidth(30);
 		tabela.getModeloColuna().getColumn(1).setPreferredWidth(250);
-		tabela.getModeloColuna().getColumn(2).setPreferredWidth(70);
+		tabela.getModeloColuna().getColumn(2).setPreferredWidth(120);
 
 		tabela.getModeloColuna().setCampo(0, "id");
-		tabela.getModeloColuna().setCampo(1, "descr");
-		tabela.getModeloColuna().setCampo(2, "sigla");
+		tabela.getModeloColuna().setCampo(1, "nome");
+		tabela.getModeloColuna().setCampo(2, "cpf");
 
 	}
 
@@ -162,14 +162,14 @@ public class FrmEstados extends FormularioConsulta {
 	}
 
 	private void listar() {
-		List<Estado> lista = new ArrayList<Estado>();
+		List<Pessoa> lista = new ArrayList<Pessoa>();
 		try {
-			String descr = txtFiltro.getText();
-			if (Validacao.vazio(descr)) {
+			String nome = txtFiltro.getText();
+			if (Validacao.vazio(nome)) {
 				lista = dao.findAll();
 
 			} else {
-				lista = dao.findByDescrContainingIgnoreCase(descr);
+				lista = dao.findByNomeContainingIgnoreCase(nome);
 			}
 			if (lista.size() == 0)
 				SSMensagem.avisa("Nenhum dado encontrado");
@@ -186,7 +186,7 @@ public class FrmEstados extends FormularioConsulta {
 	}
 
 	private void alterar() {
-		Estado entidade = (Estado) tabela.getLinhaSelecionada();
+		Pessoa entidade = (Pessoa) tabela.getLinhaSelecionada();
 		if (entidade == null) {
 			SSMensagem.avisa("Selecione um item da lista");
 			return;
@@ -194,7 +194,7 @@ public class FrmEstados extends FormularioConsulta {
 		exibirCadastro(entidade);
 	}
 
-	private void exibirCadastro(Estado entidade) {
+	private void exibirCadastro(Pessoa entidade) {
 		Formulario frm = SpringDesktopApp.getBean(formInclusao);
 		frm.setEntidade(entidade);
 		this.exibir(frm);
