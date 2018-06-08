@@ -13,6 +13,8 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import com.tandera.core.util.Biblioteca;
+
 @Entity
 @Table(name = "com_mascara_preco")
 public class MascaraPreco implements Serializable {
@@ -49,6 +51,13 @@ public class MascaraPreco implements Serializable {
 	}
 
 	public void setMascara(String mascara) {
+		//if (mascara == null) {
+		/*if(this.getValor().doubleValue() >= 0) {
+			this.mascara =  Biblioteca.criptoBigDecimalToString(this.getValor());
+		}
+		else {
+			this.mascara = mascara;
+		}*/
 		this.mascara = mascara;
 	}
 
