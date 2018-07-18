@@ -1,16 +1,23 @@
 package com.tandera.core.model.comercial;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+
+import com.tandera.core.model.orcamento.ItemCompra;
 
 
 
@@ -34,6 +41,9 @@ public class Estado implements Serializable {
 	@Size(max = 50)
 	@Column(name = "sigla", length = 5, nullable = false)
 	private String sigla;
+	
+	@OneToMany(mappedBy = "estado", fetch = FetchType.LAZY, cascade = CascadeType.ALL,orphanRemoval = true)
+	private List<ItemCompra>itemCompra = new ArrayList<ItemCompra>(); 
 
 	public Integer getId() {
 		return id;

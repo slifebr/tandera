@@ -1,7 +1,6 @@
 package com.tandera.core.model.comercial;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,8 +20,8 @@ import javax.validation.constraints.Size;
 import com.tandera.core.model.orcamento.ItemCompra;
 
 @Entity
-@Table(name = "com_markup")
-public class Markup implements Serializable {
+@Table(name = "com_categoria")
+public class Categoria implements Serializable {
 
 	/**
 	 * 
@@ -30,20 +29,16 @@ public class Markup implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "markup_seq")
-	@SequenceGenerator(name = "markup_seq", sequenceName = "markup_seq", initialValue = 1, allocationSize = 1)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "categoria_seq")
+	@SequenceGenerator(name = "categoria_seq", sequenceName = "categoria_seq", initialValue = 1, allocationSize = 1)
 	private Integer id;
 	
 	@NotNull
 	@Size(max = 50)
-	@Column(name = "sigla", length = 5, nullable = false)
-	private String sigla;
+	@Column(name = "descr", length = 50, nullable = false)
+	private String descr;
 	
-	@NotNull
-	@Column(name = "valor", nullable = false)
-	private BigDecimal valor = BigDecimal.ZERO;
-	
-	@OneToMany(mappedBy = "markup", fetch = FetchType.LAZY, cascade = CascadeType.ALL,orphanRemoval = true)
+	@OneToMany(mappedBy = "categoria", fetch = FetchType.LAZY, cascade = CascadeType.ALL,orphanRemoval = true)
 	private List<ItemCompra>itemCompra = new ArrayList<ItemCompra>(); 
 
 	public Integer getId() {
@@ -54,20 +49,12 @@ public class Markup implements Serializable {
 		this.id = id;
 	}
 
-	public String getSigla() {
-		return sigla;
+	public String getDescr() {
+		return descr;
 	}
 
-	public void setSigla(String sigla) {
-		this.sigla = sigla;
-	}
-
-	public BigDecimal getValor() {
-		return valor;
-	}
-
-	public void setValor(BigDecimal valor) {
-		this.valor = valor;
+	public void setDescr(String descr) {
+		this.descr = descr;
 	}
 
 	@Override
@@ -86,7 +73,7 @@ public class Markup implements Serializable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Markup other = (Markup) obj;
+		Categoria other = (Categoria) obj;
 		if (id == null) {
 			if (other.id != null)
 				return false;
@@ -97,7 +84,7 @@ public class Markup implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Markup [id=" + id + ", sigla=" + sigla + ", valor=" + valor + "]";
+		return "Categoria [id=" + id + ", descr=" + descr + "]";
 	}
 
 }

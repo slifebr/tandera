@@ -10,7 +10,7 @@ public interface EstadoRepository extends JpaRepository<Estado , Integer> {
 	
 	public List<Estado> findByDescrContainingIgnoreCase(String descr);
 	
-	public Estado findById(Integer id);
+	//public Estado findById(Integer id);
 	
 
 }
