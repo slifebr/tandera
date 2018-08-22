@@ -91,7 +91,7 @@ public class FrmCompras extends FormularioConsulta {
 
 		tabela.getModeloColuna().setCampo(0, "id");
 		tabela.getModeloColuna().setCampo(1, "nome");
-		tabela.getModeloColuna().setCampo(2, "status_id");
+		tabela.getModeloColuna().setCampo(2, "status");
 
 	}
 
