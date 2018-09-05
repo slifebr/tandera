@@ -11,5 +11,7 @@ import com.tandera.core.model.comercial.Categoria;
 public interface CategoriaRepository extends JpaRepository<Categoria , Integer> {
 	
 	public List<Categoria> findByDescrContainingIgnoreCase(String descr);
+	
+	//public Categoria findByDescr(String descr);
 
 }

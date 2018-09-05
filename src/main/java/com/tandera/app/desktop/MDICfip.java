@@ -3,6 +3,7 @@ package com.tandera.app.desktop;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JSeparator;
@@ -370,6 +371,7 @@ public class MDICfip extends MDI {
 		getBarraMenu().add(mnRelatorios);
 		getBarraMenu().add(mnFerramentas);
 		getBarraMenu().add(mnAjuda);
+		this.setExtendedState(JFrame.MAXIMIZED_BOTH);
 	}
 
 	private void exibirSaldo() {

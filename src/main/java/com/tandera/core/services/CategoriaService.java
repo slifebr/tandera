@@ -21,5 +21,9 @@ public class CategoriaService {
 	public Categoria salvar(Categoria categoria){
 		return categoriaRepository.save(categoria);
 	}
+
+	/*public Categoria buscarPorDescr(String value) {
+		return categoriaRepository.findByDescr(value);
+	}*/
 	
 }

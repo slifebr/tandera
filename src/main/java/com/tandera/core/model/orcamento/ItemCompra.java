@@ -10,7 +10,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -64,7 +63,7 @@ public class ItemCompra implements Serializable  {
 	@NotNull
 	@Size(max = 50)
 	@Column(name = "vl_mascara", length = 50, nullable = false)
-	private String vlMascara;
+	private BigDecimal vlMascara;
 	
 	@ManyToOne
 	@JoinColumn(name="markup_id",foreignKey = @ForeignKey(name="fk06_itemCompra"))
@@ -131,14 +130,6 @@ public class ItemCompra implements Serializable  {
 		this.estado = estado;
 	}
 
-	public MascaraPreco getMascara() {
-		return mascaraPreco;
-	}
-
-	public void setMascara(MascaraPreco mascara) {
-		this.mascaraPreco = mascara;
-	}
-
 	public Markup getMarkup() {
 		return markup;
 	}
@@ -171,14 +162,22 @@ public class ItemCompra implements Serializable  {
 		this.compra = compra;
 	}
 	
-	public void setVlMascara(String vlMascara) {
+	public void setVlMascara(BigDecimal vlMascara) {
 		this.vlMascara = vlMascara;
 	}
 	
-	public String getVlMascara() {
+	public BigDecimal getVlMascara() {
 		return vlMascara;
 	}
 	
+
+	public MascaraPreco getMascaraPreco() {
+		return mascaraPreco;
+	}
+
+	public void setMascaraPreco(MascaraPreco mascaraPreco) {
+		this.mascaraPreco = mascaraPreco;
+	}
 
 	@Override
 	public int hashCode() {
