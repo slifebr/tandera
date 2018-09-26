@@ -13,6 +13,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -81,6 +82,14 @@ public class ItemCompra implements Serializable  {
 	@ManyToOne
 	@JoinColumn(name="compra_id",foreignKey = @ForeignKey(name="fk07_itemCompra"))
 	private Compra compra;
+	
+	@Transient
+	private BigDecimal valorTotal;
+	
+
+	public BigDecimal getValorTotal() {
+		return getValor().multiply(BigDecimal.valueOf(getQtde()));
+	}
 
 	public Integer getId() {
 		return id;

@@ -15,6 +15,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -47,6 +48,14 @@ public class MascaraPreco implements Serializable {
 	@OneToMany(mappedBy = "mascaraPreco", fetch = FetchType.LAZY, cascade = CascadeType.ALL,orphanRemoval = true)
 	private List<ItemCompra>itemCompra = new ArrayList<ItemCompra>(); 
 
+	@Transient
+	private String mascaraComValor;
+	
+	
+	public String getMascaraComValor() {
+		return this.mascara + " # "+ String.valueOf(this.valor.doubleValue());
+	}
+
 	public Integer getId() {
 		return id;
 	}
@@ -60,13 +69,6 @@ public class MascaraPreco implements Serializable {
 	}
 
 	public void setMascara(String mascara) {
-		//if (mascara == null) {
-		/*if(this.getValor().doubleValue() >= 0) {
-			this.mascara =  Biblioteca.criptoBigDecimalToString(this.getValor());
-		}
-		else {
-			this.mascara = mascara;
-		}*/
 		this.mascara = mascara;
 	}
 

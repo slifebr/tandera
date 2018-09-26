@@ -11,7 +11,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -27,6 +26,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import com.tandera.core.model.cadastro.Pessoa;
+import com.tandera.core.model.enuns.SimNao;
 import com.tandera.core.model.enuns.StatusOrcamento;
 
 @Entity
@@ -73,6 +73,7 @@ public class Compra implements Serializable {
 	@Column(name = "vl_deposito", nullable = false)
 	private BigDecimal vlDeposito = BigDecimal.ZERO;
 	
+
 	@NotNull
 	@Column(name = "vl_troca", nullable = false)
 	private BigDecimal vlTroca = BigDecimal.ZERO;
@@ -83,6 +84,11 @@ public class Compra implements Serializable {
 	
 	@OneToMany(mappedBy = "compra", cascade = CascadeType.ALL,orphanRemoval = true)
 	private List<ItemCompra>itemCompra = new ArrayList<ItemCompra>(); 
+	
+	@Enumerated(EnumType.STRING)
+	private SimNao consignado;
+	
+	
 
 	public Integer getId() {
 		return id;
@@ -170,6 +176,14 @@ public class Compra implements Serializable {
 
 	public void setItemCompra(List<ItemCompra> itemCompra) {
 		this.itemCompra = itemCompra;
+	}
+	
+	public SimNao getConsignado() {
+		return consignado;
+	}
+
+	public void setConsignado(SimNao consignado) {
+		this.consignado = consignado;
 	}
 
 	@Override

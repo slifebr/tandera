@@ -84,14 +84,17 @@ public class FrmCompras extends FormularioConsulta {
 		tabela.getModeloTabela().addColumn("Número");
 		tabela.getModeloTabela().addColumn("Nome");
 		tabela.getModeloTabela().addColumn("Status");
+		tabela.getModeloTabela().addColumn("Cons.");
 
 		tabela.getModeloColuna().getColumn(0).setPreferredWidth(30);
 		tabela.getModeloColuna().getColumn(1).setPreferredWidth(250);
 		tabela.getModeloColuna().getColumn(2).setPreferredWidth(70);
+		tabela.getModeloColuna().getColumn(2).setPreferredWidth(40);
 
 		tabela.getModeloColuna().setCampo(0, "id");
 		tabela.getModeloColuna().setCampo(1, "nome");
 		tabela.getModeloColuna().setCampo(2, "status");
+		tabela.getModeloColuna().setCampo(3, "consignado");
 
 	}
 

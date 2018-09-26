@@ -21,6 +21,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.swing.SwingConstants;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.LineBorder;
 
@@ -41,6 +42,7 @@ import com.tandera.core.model.comercial.Marca;
 import com.tandera.core.model.comercial.Markup;
 import com.tandera.core.model.comercial.MascaraPreco;
 import com.tandera.core.model.comercial.Tamanho;
+import com.tandera.core.model.enuns.SimNao;
 import com.tandera.core.model.enuns.StatusOrcamento;
 import com.tandera.core.model.orcamento.Compra;
 import com.tandera.core.model.orcamento.ItemCompra;
@@ -54,11 +56,11 @@ import edu.porgamdor.util.desktop.ss.SSCaixaCombinacao;
 import edu.porgamdor.util.desktop.ss.SSCampoDataHora;
 import edu.porgamdor.util.desktop.ss.SSCampoNumero;
 import edu.porgamdor.util.desktop.ss.SSCampoTexto;
+import edu.porgamdor.util.desktop.ss.SSCampoTextoArea;
 import edu.porgamdor.util.desktop.ss.SSGrade;
 import edu.porgamdor.util.desktop.ss.SSMensagem;
 import edu.porgamdor.util.desktop.ss.evento.ValidacaoEvento;
 import edu.porgamdor.util.desktop.ss.evento.ValidacaoListener;
-import edu.porgamdor.util.desktop.ss.util.Validacao;
 
 @Component
 //@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -84,11 +86,12 @@ public class FrmCompra extends Formulario {
 	//CAMPOS COMPRA
 	private SSCampoNumero txtCodigo = new SSCampoNumero();
 	private SSCampoDataHora txtData = new SSCampoDataHora();
+	private SSCaixaCombinacao cboConsignado = new SSCaixaCombinacao();	
 	private SSCaixaCombinacao cboStatus = new SSCaixaCombinacao();
 	private SSCampoNumero txtIdPessoa = new SSCampoNumero();
 	private SSCampoTexto txtNome = new SSCampoTexto();
 	private SSCampoTexto txtTelefone = new SSCampoTexto();
-	private SSCampoTexto txtObs = new SSCampoTexto();
+	private SSCampoTextoArea txtObs = new SSCampoTextoArea();
 	private SSCampoNumero txtDeposito = new SSCampoNumero();
 	private SSCampoNumero txtTroca = new SSCampoNumero();
 	private SSCampoNumero txtDoacao = new SSCampoNumero();
@@ -167,7 +170,8 @@ public class FrmCompra extends Formulario {
 		super.getRodape().add(cmdSalvar);
 		super.getRodape().add(cmdSair);
 		
-		cboStatus.setItens(StatusOrcamento.values());;
+		cboStatus.setItens(StatusOrcamento.values());
+		cboConsignado.setItens(SimNao.values());
 		
 		adicionarListner();
 		configurarCamposCompra();
@@ -193,6 +197,10 @@ public class FrmCompra extends Formulario {
 		txtData.setColunas(10);
 		txtData.setRotulo("Data");
 
+		cboConsignado.setBounds(300, 5, 100, 50);
+		cboConsignado.setRotulo("Consignado");
+		panelCampos.add(cboConsignado);	
+		
 		cboStatus.setBounds(656, 5, 205, 50);
 		cboStatus.setRotulo("Status");
 		panelCampos.add(cboStatus);
@@ -217,6 +225,7 @@ public class FrmCompra extends Formulario {
 		txtObs.setBounds(10, 109, 636, 77);
 		txtObs.setRotulo("Obs.");
 		txtObs.setColunas(10);
+		txtObs.setAutoscrolls(true);
 		panelCampos.add(txtObs);
 		txtDeposito.setRotuloPosicao(PosicaoRotulo.ESQUERDA);
 
@@ -261,7 +270,7 @@ public class FrmCompra extends Formulario {
 		cboMarca.setRotulo("Marca");
 		
 		panel_inclusao.add(cboTamanho);
-		cboTamanho.setComponenteTamanhoPreferido(new Dimension(100, 20));
+		cboTamanho.setComponenteTamanhoPreferido(new Dimension(120, 20));
 		cboTamanho.setRotulo("Tamanho");
 		
 		panel_inclusao.add(cboQualidade);
@@ -269,15 +278,15 @@ public class FrmCompra extends Formulario {
 		cboQualidade.setRotulo("Qualidade");
 		
 		panel_inclusao.add(cboMascara);
-		cboMascara.setComponenteTamanhoPreferido(new Dimension(100, 20));
+		cboMascara.setComponenteTamanhoPreferido(new Dimension(80, 20));
 		cboMascara.setRotulo("Mascara");
 		
 		panel_inclusao.add(cboMarkup);
-		cboMarkup.setComponenteTamanhoPreferido(new Dimension(100, 20));
+		cboMarkup.setComponenteTamanhoPreferido(new Dimension(60, 20));
 		cboMarkup.setRotulo("Peso");
 		
 		panel_inclusao.add(txtQtde);
-		txtQtde.setComponenteTamanhoPreferido(new Dimension(50, 20));
+		txtQtde.setComponenteTamanhoPreferido(new Dimension(60, 20));
 		txtQtde.setRotulo("Qtde");
 		
 		panel_inclusao.add(txtValor);
@@ -387,17 +396,21 @@ public class FrmCompra extends Formulario {
 		tabela.getModeloTabela().addColumn("Mascara");
 		tabela.getModeloTabela().addColumn("Peso");
 		tabela.getModeloTabela().addColumn("Qtde");
-		tabela.getModeloTabela().addColumn("Valor");
+		tabela.getModeloTabela().addColumn("Vl. Unit.");
+		tabela.getModeloTabela().addColumn("Vl. Total");
+		
 
 		tabela.getModeloColuna().getColumn(0).setPreferredWidth(40);
 		tabela.getModeloColuna().getColumn(1).setPreferredWidth(100);
 		tabela.getModeloColuna().getColumn(2).setPreferredWidth(80);
-		tabela.getModeloColuna().getColumn(3).setPreferredWidth(80);
-		tabela.getModeloColuna().getColumn(4).setPreferredWidth(80);
-		tabela.getModeloColuna().getColumn(5).setPreferredWidth(60);
-		tabela.getModeloColuna().getColumn(6).setPreferredWidth(30);
-		tabela.getModeloColuna().getColumn(7).setPreferredWidth(50);
-		tabela.getModeloColuna().getColumn(8).setPreferredWidth(50);
+		tabela.getModeloColuna().getColumn(3).setPreferredWidth(150);
+		tabela.getModeloColuna().getColumn(4).setPreferredWidth(120);
+		tabela.getModeloColuna().getColumn(5).setPreferredWidth(80);
+		tabela.getModeloColuna().getColumn(6).setPreferredWidth(40);
+		tabela.getModeloColuna().getColumn(7).setPreferredWidth(60);
+		tabela.getModeloColuna().getColumn(8).setPreferredWidth(60);
+		tabela.getModeloColuna().getColumn(9).setPreferredWidth(60);
+		
 
 		tabela.getModeloColuna().setCampo(0, "item");
 		tabela.getModeloColuna().setCampo(1, "categoria.descr");
@@ -408,6 +421,11 @@ public class FrmCompra extends Formulario {
 		tabela.getModeloColuna().setCampo(6, "markup.sigla");
 		tabela.getModeloColuna().setCampo(7, "qtde");
 		tabela.getModeloColuna().setCampo(8, "valor");
+		tabela.getModeloColuna().setAlinhamentoColuna(8, SwingConstants.RIGHT);
+		tabela.getModeloColuna().setMascara(8,"###.##0,00");
+		tabela.getModeloColuna().setCampo(9, "valorTotal");
+		tabela.getModeloColuna().setAlinhamentoColuna(9, SwingConstants.RIGHT);
+		tabela.getModeloColuna().setMascara(9,"###.##0,00");
 
 	}
 
@@ -479,6 +497,7 @@ public class FrmCompra extends Formulario {
 			txtDeposito.setValue(entidade.getVlDeposito());
 			txtTroca.setValue(entidade.getVlTroca());
 			txtDoacao.setValue(entidade.getVlDoacao());
+			cboConsignado.setValue(entidade.getConsignado());
 			txtData.requestFocus();
 			loadItens();
 		} catch (Exception e) {
@@ -505,6 +524,7 @@ public class FrmCompra extends Formulario {
 			entidade.setVlDeposito(BigDecimal.valueOf(txtDeposito.getDouble()));
 			entidade.setVlTroca(BigDecimal.valueOf(txtTroca.getDouble()));
 			entidade.setVlDoacao(BigDecimal.valueOf(txtDoacao.getDouble()));
+			entidade.setConsignado((SimNao) cboConsignado.getValue());
 
 			if (entidade.getData() == null || entidade.getStatus() == null || entidade.getNome() == null
 					|| entidade.getNome().isEmpty() || entidade.getTelefone() == null
@@ -555,27 +575,8 @@ public class FrmCompra extends Formulario {
 			itemCompra = this.itemCompraSelecionado;
 		}
 		
-/*
- 		ItemCompra itemCompra = new ItemCompra();	
-		listaDeItens = new ArrayList<ItemCompra>();		
-		List<ItemCompra> listaDeItens;
-		
-		if (this.acao == "NOVO") {
-			vcContadorDeItens++;
-				
-		} else {
-			listaDeItens = entidade.
-		}
-		
-			
- */
-		
-		BigDecimal mascara = BigDecimal.ZERO;
+	
 		this.mascaraPreco = ((MascaraPreco) cboMascara.getValue());
-				
-		//ItemCompra itemCompra = new ItemCompra();
-		//List<ItemCompra> listaDeItens = new ArrayList<ItemCompra>();
-		
 		itemCompra.setCategoria((Categoria) cboCategoria.getValue());
 		itemCompra.setMarca((Marca) cboMarca.getValue());
 		itemCompra.setTamanho((Tamanho) cboTamanho.getValue());
@@ -584,11 +585,13 @@ public class FrmCompra extends Formulario {
 		itemCompra.setMarkup((Markup) cboMarkup.getValue());
 		itemCompra.setQtde(txtQtde.getInteger());			
 		itemCompra.setValor(BigDecimal.valueOf(txtValor.getDouble()));
-		
-		mascara = Biblioteca.descriptoStringToBigDecimal(this.mascaraPreco.getMascara());
 		itemCompra.setCompra(entidade);
-		itemCompra.setVlMascara(mascara);
 		itemCompra.setItem(vcContadorDeItens);
+		
+		BigDecimal mascara = BigDecimal.ZERO;
+		mascara = Biblioteca.descriptoStringToBigDecimal(this.mascaraPreco.getMascara());
+		itemCompra.setVlMascara(mascara);
+		
 		
 		/*Categoria categoria = categoriaService.buscarPorDescr(cboCategoria.getValue().toString());
 		itemCompra.setCategoria(categoria);*/
@@ -596,6 +599,9 @@ public class FrmCompra extends Formulario {
 		listaDeItens.add(itemCompra);
 		this.entidade.setItemCompra(listaDeItens);
 		
+		// limpar campos de adicao/alteração de itens
+		cboCategoria.setValue(null);
+		cboMascara.setValue(null);
 	}
 	
 	//@Override
@@ -612,7 +618,7 @@ public class FrmCompra extends Formulario {
 		cboQualidade.setItens(estado, "descr");
 		
 		List<MascaraPreco> mascaraPreco = mascaraPrecoRepository.findAll();
-		cboMascara.setItens(mascaraPreco, "mascara");
+		cboMascara.setItens(mascaraPreco, "mascaraComValor");
 		
 		List<Markup> markup = markupRepository.findAll();
 		cboMarkup.setItens(markup, "sigla");
