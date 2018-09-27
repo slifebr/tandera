@@ -11,6 +11,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -82,7 +83,7 @@ public class Compra implements Serializable {
 	@Column(name = "vl_doacao", nullable = false)
 	private BigDecimal vlDoacao = BigDecimal.ZERO;
 	
-	@OneToMany(mappedBy = "compra", cascade = CascadeType.ALL,orphanRemoval = true)
+	@OneToMany(mappedBy = "compra", fetch=FetchType.EAGER, cascade = CascadeType.ALL,orphanRemoval = true)
 	private List<ItemCompra>itemCompra = new ArrayList<ItemCompra>(); 
 	
 	@Enumerated(EnumType.STRING)

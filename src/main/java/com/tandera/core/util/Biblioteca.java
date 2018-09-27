@@ -2,6 +2,13 @@ package com.tandera.core.util;
 
 import java.math.BigDecimal;
 
+import javax.swing.JComboBox;
+import javax.swing.JTextField;
+
+import edu.porgamdor.util.desktop.ss.SSCaixaCombinacao;
+import edu.porgamdor.util.desktop.ss.SSCampoNumero;
+import edu.porgamdor.util.desktop.ss.SSCampoTexto;
+
 public  class Biblioteca {
      
 
@@ -44,4 +51,32 @@ public  class Biblioteca {
 		return retorno;
 		
 	}	
+	
+	public static boolean temValorValido(SSCampoTexto campo) {
+		boolean retorno = false;
+	    retorno =  campo.getText() != null && !campo.getText().trim().isEmpty();
+
+	    return retorno;
+	}
+	
+	public static boolean temValorValido(SSCaixaCombinacao campo) {
+		boolean retorno = false;
+	    retorno =  campo.getText() != null && !campo.getText().trim().isEmpty();
+	    return retorno;
+	}	
+	
+	public static boolean temValorValido(SSCampoNumero campo, String tipo) {
+		boolean retorno = false;
+	    retorno =  campo.getText() != null && !campo.getText().trim().isEmpty();
+	    
+	    if (retorno && tipo.contains("IN")) {  
+	    	// S = String | I = Integer | N = Decimal  | D = Data
+	    	if (tipo.compareTo("I") == 0) {
+	    		retorno = (Integer.parseInt(campo.getText()) <= 0);
+	    	} else if (tipo.compareTo("N") == 0) {
+		    	retorno = (new BigDecimal(campo.getText()).compareTo(BigDecimal.ZERO) > 0);
+	    	}
+	    }
+	    return retorno;
+	}		
 }

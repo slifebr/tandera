@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.tandera.core.model.orcamento.Compra;
 import com.tandera.core.model.orcamento.ItemCompra;
 
+
 public interface CompraRepository extends JpaRepository<Compra, Integer> {
 	
 	public List<Compra> findByNomeContainingIgnoreCase(String nome);

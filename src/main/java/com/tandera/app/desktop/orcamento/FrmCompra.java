@@ -79,7 +79,7 @@ public class FrmCompra extends Formulario {
 	private MascaraPrecoRepository mascaraPrecoRepository;
 	private MarkupRepository markupRepository;
 
-	private Compra entidade;
+	private Compra compra;
 	private ItemCompra itemCompraSelecionado;
 	private MascaraPreco mascaraPreco;
 
@@ -110,6 +110,7 @@ public class FrmCompra extends Formulario {
 	private SSBotao cmdSalvar = new SSBotao();
 	private SSBotao cmdSair = new SSBotao();
 	private JCheckBox chkNovo = new JCheckBox("Novo?");
+	private JCheckBox chkNovoItem = new JCheckBox("Novo?");
 
 	private JScrollPane scroll = new JScrollPane();
 	private SSGrade tabela = new SSGrade();
@@ -121,6 +122,7 @@ public class FrmCompra extends Formulario {
 	private final JPanel panel_inclusao = new JPanel();
 	private final JButton btnIncluir = new JButton("Incluir");
 	private final JButton btnAlterar = new JButton("Alterar");
+	private final JButton btnExcluirItem = new JButton("Excluir");
 	private final SSBotao salvarItem = new SSBotao();
 	private final JPanel panel = new JPanel();
 	
@@ -150,7 +152,7 @@ public class FrmCompra extends Formulario {
 		getConteudo().setBackground(Color.YELLOW);
 		getConteudo().setLayout(null);
 		panel_grade.setBackground(Color.MAGENTA);
-		panel_grade.setBounds(0, 190, 903, 270);
+		panel_grade.setBounds(0, 190, 940,270); //903, 270);
 		getConteudo().add(panel_grade);
 		
 
@@ -159,6 +161,7 @@ public class FrmCompra extends Formulario {
 		adicionarScrollGrade();
 
 		init();
+		panel_inclusao.setVisible(false);
 		setPreferredSize(new Dimension(883, 543));
 		//setSize(new Dimension(883, 543));		
 	}
@@ -305,9 +308,9 @@ public class FrmCompra extends Formulario {
 		salvarItem.setAlignmentY(java.awt.Component.BOTTOM_ALIGNMENT);
 		salvarItem.setText("Salvar");
 		
-		JCheckBox checkBox = new JCheckBox("Novo?");
-		checkBox.setBounds(0, 0, 55, 23);
-		panel.add(checkBox);
+		
+		chkNovoItem.setBounds(0, 0, 55, 23);
+		panel.add(chkNovoItem);
 		
 	}
 
@@ -333,6 +336,13 @@ public class FrmCompra extends Formulario {
 				novoItem();
 			}
 		});
+		
+		btnExcluirItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				excluirItem();
+			}
+		});
+		
 		salvarItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				adicionarItem();
@@ -360,7 +370,7 @@ public class FrmCompra extends Formulario {
 
 	// public void setEntidade(Natureza entidade) {
 	public void setEntidade(Object entidade) {
-		this.entidade = (Compra) entidade;
+		this.compra = (Compra) entidade;
 		if (entidade != null)
 			atribuir();
 		else
@@ -420,18 +430,19 @@ public class FrmCompra extends Formulario {
 		tabela.getModeloColuna().setCampo(5, "mascaraPreco.mascara");
 		tabela.getModeloColuna().setCampo(6, "markup.sigla");
 		tabela.getModeloColuna().setCampo(7, "qtde");
+		tabela.getModeloColuna().setAlinhamentoColuna(7, SwingConstants.RIGHT);
 		tabela.getModeloColuna().setCampo(8, "valor");
 		tabela.getModeloColuna().setAlinhamentoColuna(8, SwingConstants.RIGHT);
-		tabela.getModeloColuna().setMascara(8,"###.##0,00");
+		//tabela.getModeloColuna().setMascara(8,"##0.00");
 		tabela.getModeloColuna().setCampo(9, "valorTotal");
 		tabela.getModeloColuna().setAlinhamentoColuna(9, SwingConstants.RIGHT);
-		tabela.getModeloColuna().setMascara(9,"###.##0,00");
+		//tabela.getModeloColuna().setMascara(9,"##0.00");
 
 	}
 
 	private void adicionarScrollGrade() {
 		
-				panel_inclusao.setBackground(Color.GREEN);
+		panel_inclusao.setBackground(Color.GREEN);
 		scroll.setViewportBorder(new LineBorder(Color.BLACK));
 
 		scroll.setViewportView(tabela);
@@ -444,26 +455,26 @@ public class FrmCompra extends Formulario {
 		gl_panel_grade.setHorizontalGroup(
 			gl_panel_grade.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_panel_grade.createSequentialGroup()
-					.addGroup(gl_panel_grade.createParallelGroup(Alignment.TRAILING, false)
-						.addComponent(scroll, Alignment.LEADING)
-						.addComponent(panel_inclusao, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 896, Short.MAX_VALUE))
-					.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+				.addGroup(gl_panel_grade.createParallelGroup(Alignment.TRAILING, false)
+				.addComponent(scroll, Alignment.LEADING)
+				.addComponent(panel_inclusao, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 940, Short.MAX_VALUE))
+				.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
 				.addComponent(panel_radape, GroupLayout.DEFAULT_SIZE, 871, Short.MAX_VALUE)
 		);
 		gl_panel_grade.setVerticalGroup(
 			gl_panel_grade.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_panel_grade.createSequentialGroup()
-					.addComponent(panel_inclusao, GroupLayout.PREFERRED_SIZE, 69, GroupLayout.PREFERRED_SIZE)
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(scroll, GroupLayout.PREFERRED_SIZE, 139, GroupLayout.PREFERRED_SIZE)
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(panel_radape, GroupLayout.DEFAULT_SIZE, 39, Short.MAX_VALUE)
-					.addContainerGap())
+				.addComponent(panel_inclusao, GroupLayout.PREFERRED_SIZE, 69, GroupLayout.PREFERRED_SIZE)
+				.addPreferredGap(ComponentPlacement.RELATED)
+				.addComponent(scroll, GroupLayout.PREFERRED_SIZE, 139, GroupLayout.PREFERRED_SIZE)
+				.addPreferredGap(ComponentPlacement.RELATED)
+				.addComponent(panel_radape, GroupLayout.DEFAULT_SIZE, 39, Short.MAX_VALUE)
+				.addContainerGap())
 		);
 		
 		panel_radape.add(btnIncluir);
-		
 		panel_radape.add(btnAlterar);
+		panel_radape.add(btnExcluirItem);
 		panel_grade.setLayout(gl_panel_grade);
 
 	}
@@ -487,58 +498,71 @@ public class FrmCompra extends Formulario {
 	}
 	private void atribuir() {
 		try {
-			txtCodigo.setValue(entidade.getId());
-			txtData.setValue(entidade.getData());
-			cboStatus.setValue(entidade.getStatus());
-			txtIdPessoa.setValue(entidade.getPessoa());
-			txtNome.setValue(entidade.getNome());
-			txtTelefone.setValue(entidade.getTelefone());
-			txtObs.setValue(entidade.getObs());
-			txtDeposito.setValue(entidade.getVlDeposito());
-			txtTroca.setValue(entidade.getVlTroca());
-			txtDoacao.setValue(entidade.getVlDoacao());
-			cboConsignado.setValue(entidade.getConsignado());
+			txtCodigo.setValue(compra.getId());
+			txtData.setValue(compra.getData());
+			cboStatus.setValue(compra.getStatus());
+			txtIdPessoa.setValue(compra.getPessoa());
+			txtNome.setValue(compra.getNome());
+			txtTelefone.setValue(compra.getTelefone());
+			txtObs.setValue(compra.getObs());
+			txtDeposito.setValue(compra.getVlDeposito());
+			txtTroca.setValue(compra.getVlTroca());
+			txtDoacao.setValue(compra.getVlDoacao());
+			cboConsignado.setValue(compra.getConsignado());
 			txtData.requestFocus();
 			loadItens();
+
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(null, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
 		}
 	}
 
 	private void criar() {
-		entidade = new Compra();
+		compra = new Compra();
 		atribuir();
 	}
 
 	private void salvar() {
 		try {
-			entidade.setData(txtData.getDataHora());
-			entidade.setStatus((StatusOrcamento) cboStatus.getValue());
-
-			Pessoa pessoa = pessoaRepository.findById(txtIdPessoa.getInteger());
-
-			entidade.setPessoa(pessoa);
-			entidade.setNome(txtNome.getText());
-			entidade.setTelefone(txtTelefone.getText());
-			entidade.setObs(txtObs.getText());
-			entidade.setVlDeposito(BigDecimal.valueOf(txtDeposito.getDouble()));
-			entidade.setVlTroca(BigDecimal.valueOf(txtTroca.getDouble()));
-			entidade.setVlDoacao(BigDecimal.valueOf(txtDoacao.getDouble()));
-			entidade.setConsignado((SimNao) cboConsignado.getValue());
-
-			if (entidade.getData() == null || entidade.getStatus() == null || entidade.getNome() == null
-					|| entidade.getNome().isEmpty() || entidade.getTelefone() == null
-					|| entidade.getTelefone().isEmpty()) {
-				SSMensagem.avisa("Dados incompletos");
-				return;
-			}
-
-			// dao.gravar(operacao, entidade);
-	
-			compraRepository.save(entidade);
-
-			SSMensagem.informa("Natureza registrado com sucesso!!");
-			novo();
+			if (this.acao.compareTo("EXCLUIR") == 0) {
+				
+				SSMensagem.informa("antes de salvar!!");	
+				compra.getItemCompra().forEach(System.out::println);
+				
+				compraRepository.saveAndFlush(compra);
+				SSMensagem.informa("Item Excluido com sucesso!!");				
+			} else {	
+				compra.setData(txtData.getDataHora());
+				compra.setStatus((StatusOrcamento) cboStatus.getValue());
+				
+				Pessoa pessoa = pessoaRepository.findById(txtIdPessoa.getInteger());
+				
+				compra.setPessoa(pessoa);
+				compra.setNome(txtNome.getText());
+				compra.setTelefone(txtTelefone.getText());
+				compra.setObs(txtObs.getText());
+				compra.setVlDeposito(BigDecimal.valueOf(txtDeposito.getDouble()));
+				compra.setVlTroca(BigDecimal.valueOf(txtTroca.getDouble()));
+				compra.setVlDoacao(BigDecimal.valueOf(txtDoacao.getDouble()));
+				compra.setConsignado((SimNao) cboConsignado.getValue());
+				
+				if (compra.getData() == null || compra.getStatus() == null || compra.getNome() == null
+						|| compra.getNome().isEmpty() || compra.getTelefone() == null
+						|| compra.getTelefone().isEmpty()) {
+					SSMensagem.avisa("Dados incompletos");
+					return;
+				}
+				
+				// dao.gravar(operacao, entidade);
+				
+				compraRepository.save(compra);
+				
+				SSMensagem.informa("Orçamento de Compra registrado com sucesso!!");
+				novo();
+			} 
+			
+			
+			
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(null, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
 		}
@@ -560,7 +584,52 @@ public class FrmCompra extends Formulario {
 	}
 	
 	private void alterarItem() {
-		panel_inclusao.setVisible(false);
+		panel_inclusao.setVisible(true);
+	}
+	
+	private void excluirItem() {
+		ItemCompra itemCompra = (ItemCompra) tabela.getLinhaSelecionada();
+		if (itemCompra == null) {
+			SSMensagem.avisa("Selecione um item da lista");
+			return;
+		}
+
+		if (SSMensagem.confirma("Confirma exclusão do Registro (" + itemCompra.getItem() + "-"+ itemCompra.getCategoria().getDescr()+")?")){
+			this.acao = "EXCLUIR";
+			SSMensagem.avisa("AQUI: "+tabela.getSelectedRow());
+			tabela.getModeloTabela().fireTableRowsDeleted(tabela.getSelectedRow(), tabela.getSelectedRow());
+			SSMensagem.avisa("AQUI");
+			compra.getItemCompra().remove(itemCompra);
+			SSMensagem.avisa("AQUI2");
+			//tabela.remove(tabela.getSelectedRow());
+			salvar();
+			SSMensagem.avisa("AQUI3");
+			listaItens();
+			SSMensagem.avisa("AQUI4");
+			
+		}
+		
+	}
+	
+	private boolean validaItens() {
+		boolean retorno = true;
+
+		if (
+		      !Biblioteca.temValorValido(cboMascara) &&
+		      !Biblioteca.temValorValido(cboCategoria) &&
+		      !Biblioteca.temValorValido(cboMarca) &&
+		      !Biblioteca.temValorValido(cboTamanho) &&
+		      !Biblioteca.temValorValido(cboQualidade) &&
+		      !Biblioteca.temValorValido(cboMarkup) &&
+		      !Biblioteca.temValorValido(txtQtde,"I")  &&
+		      !Biblioteca.temValorValido(txtValor,"N")  &&
+		      !Biblioteca.temValorValido(cboMascara)
+		    ) {
+			SSMensagem.avisa("Falta dados para ser gravado!" );
+			retorno = false;
+		}
+			
+		return retorno;
 	}
 	
 	private void adicionarItem(){
@@ -574,34 +643,43 @@ public class FrmCompra extends Formulario {
 		} else {
 			itemCompra = this.itemCompraSelecionado;
 		}
-		
-	
-		this.mascaraPreco = ((MascaraPreco) cboMascara.getValue());
-		itemCompra.setCategoria((Categoria) cboCategoria.getValue());
-		itemCompra.setMarca((Marca) cboMarca.getValue());
-		itemCompra.setTamanho((Tamanho) cboTamanho.getValue());
-		itemCompra.setEstado((Estado) cboQualidade.getValue());
-		itemCompra.setMascaraPreco(this.mascaraPreco);
-		itemCompra.setMarkup((Markup) cboMarkup.getValue());
-		itemCompra.setQtde(txtQtde.getInteger());			
-		itemCompra.setValor(BigDecimal.valueOf(txtValor.getDouble()));
-		itemCompra.setCompra(entidade);
-		itemCompra.setItem(vcContadorDeItens);
-		
-		BigDecimal mascara = BigDecimal.ZERO;
-		mascara = Biblioteca.descriptoStringToBigDecimal(this.mascaraPreco.getMascara());
-		itemCompra.setVlMascara(mascara);
-		
-		
-		/*Categoria categoria = categoriaService.buscarPorDescr(cboCategoria.getValue().toString());
-		itemCompra.setCategoria(categoria);*/
-		
-		listaDeItens.add(itemCompra);
-		this.entidade.setItemCompra(listaDeItens);
+		if (validaItens()) {
+			this.mascaraPreco = ((MascaraPreco) cboMascara.getValue());
+			itemCompra.setCategoria((Categoria) cboCategoria.getValue());
+			itemCompra.setMarca((Marca) cboMarca.getValue());
+			itemCompra.setTamanho((Tamanho) cboTamanho.getValue());
+			itemCompra.setEstado((Estado) cboQualidade.getValue());
+			itemCompra.setMascaraPreco(this.mascaraPreco);
+			itemCompra.setMarkup((Markup) cboMarkup.getValue());
+			itemCompra.setQtde(txtQtde.getInteger());			
+			itemCompra.setValor(BigDecimal.valueOf(txtValor.getDouble()));
+			itemCompra.setCompra(compra);
+			itemCompra.setItem(vcContadorDeItens);
+			
+			BigDecimal mascara = BigDecimal.ZERO;
+			mascara = Biblioteca.descriptoStringToBigDecimal(this.mascaraPreco.getMascara());
+			itemCompra.setVlMascara(mascara);
+			listaDeItens.add(itemCompra);
+			this.compra.setItemCompra(listaDeItens);
+		}
 		
 		// limpar campos de adicao/alteração de itens
+		limparPainelInclusao();
+		listaItens();
+		
+		if (!chkNovoItem.isSelected()) {		
+			panel_inclusao.setVisible(false);
+		}
+	}
+	
+	private void limparPainelInclusao() {
 		cboCategoria.setValue(null);
-		cboMascara.setValue(null);
+		cboMascara.setValue(null);		
+		cboMarca.setValue(null);
+		cboTamanho.setValue(null);
+		cboMarkup.setValue(null);
+		txtQtde.setText(null);
+		txtValor.setText(null);
 	}
 	
 	//@Override
@@ -630,8 +708,8 @@ public class FrmCompra extends Formulario {
 		List<ItemCompra> lista = new ArrayList<ItemCompra>();
 		vcContadorDeItens = 0;
 		try {
-			if (entidade != null){
-				lista = compraRepository.listaItens(entidade.getId());
+			if (compra != null){
+				lista = compraRepository.listaItens(compra.getId());
 				vcContadorDeItens = lista.size();
 			}
 			tabela.setValue(lista);
@@ -640,4 +718,8 @@ public class FrmCompra extends Formulario {
 			SSMensagem.erro(e.getMessage());
 		}
 	}	
+	
+	private void listaItens() {
+		loadItens();
+	}
 }
