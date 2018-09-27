@@ -48,6 +48,7 @@ import com.tandera.core.model.orcamento.Compra;
 import com.tandera.core.model.orcamento.ItemCompra;
 import com.tandera.core.services.CategoriaService;
 import com.tandera.core.util.Biblioteca;
+import com.tandera.core.util.Constantes;
 
 import edu.porgamdor.util.desktop.Formulario;
 import edu.porgamdor.util.desktop.ss.PosicaoRotulo;
@@ -595,17 +596,18 @@ public class FrmCompra extends Formulario {
 		}
 
 		if (SSMensagem.confirma("Confirma exclusão do Registro (" + itemCompra.getItem() + "-"+ itemCompra.getCategoria().getDescr()+")?")){
-			this.acao = "EXCLUIR";
-			SSMensagem.avisa("AQUI: "+tabela.getSelectedRow());
+			this.acao = Constantes.ACAO_EXCLUSAO;
+
 			tabela.getModeloTabela().fireTableRowsDeleted(tabela.getSelectedRow(), tabela.getSelectedRow());
-			SSMensagem.avisa("AQUI");
+
 			compra.getItemCompra().remove(itemCompra);
-			SSMensagem.avisa("AQUI2");
+
 			//tabela.remove(tabela.getSelectedRow());
 			salvar();
-			SSMensagem.avisa("AQUI3");
-			listaItens();
-			SSMensagem.avisa("AQUI4");
+
+			tabela.setValue(compra.getItemCompra());
+			//listaItens();
+			this.acao = Constantes.ACAO_CONSULTAR;
 			
 		}
 		
@@ -684,6 +686,7 @@ public class FrmCompra extends Formulario {
 	
 	//@Override
 	public void load() {
+		this.acao = Constantes.ACAO_CONSULTAR;
 		cboCategoria.setItens(categoriaService.listarTodos(), "descr");
 		
 		List<Marca> marca = marcaRepository.findAll();
