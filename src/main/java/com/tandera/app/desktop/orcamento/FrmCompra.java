@@ -598,12 +598,13 @@ public class FrmCompra extends Formulario {
 		if (SSMensagem.confirma("Confirma exclusão do Registro (" + itemCompra.getItem() + "-"+ itemCompra.getCategoria().getDescr()+")?")){
 			this.acao = Constantes.ACAO_EXCLUSAO;
 
-			tabela.getModeloTabela().fireTableRowsDeleted(tabela.getSelectedRow(), tabela.getSelectedRow());
+			//tabela.getModeloTabela().fireTableRowsDeleted(tabela.getSelectedRow(), tabela.getSelectedRow());
 
-			compra.getItemCompra().remove(itemCompra);
-
+            compraRepository.deleteItemCompra(itemCompra.getId());
+            compra.getItemCompra().remove(itemCompra);
+            //compra.setItemCompra(compraRepository.listaItens(compra.getId()));
 			//tabela.remove(tabela.getSelectedRow());
-			salvar();
+			//salvar();
 
 			tabela.setValue(compra.getItemCompra());
 			//listaItens();
@@ -635,11 +636,11 @@ public class FrmCompra extends Formulario {
 	}
 	
 	private void adicionarItem(){
-		this.acao = "NOVO";
+		this.acao = Constantes.ACAO_NOVO;
 		List<ItemCompra> listaDeItens = new ArrayList<ItemCompra>();;
 		ItemCompra itemCompra;
 		
-		if (this.acao == "NOVO") {
+		if (this.acao == Constantes.ACAO_NOVO){
 			vcContadorDeItens++;
 			itemCompra = new ItemCompra();
 		} else {

@@ -1,19 +1,16 @@
 package com.tandera.teste;
 
-import java.util.List;
+import org.springframework.context.support.AbstractApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-
-import com.tandera.core.dao.springjpa.CompraRepository;
 import com.tandera.core.model.orcamento.Compra;
-import com.tandera.core.model.orcamento.ItemCompra;
 
 public class TesteCompra {
 
 	public static void main(String[] args) {
+		//AbstractApplicationContext context = new Configc("springconfig.xml");
+       // EmployeeRepository repository = context.getBean(EmployeeRepository.class);
+ 		
 		Compra compra = new Compra();
 
 
