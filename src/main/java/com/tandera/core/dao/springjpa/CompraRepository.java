@@ -16,7 +16,7 @@ public interface CompraRepository extends JpaRepository<Compra, Integer> {
 	
 	public List<Compra> findByNomeContainingIgnoreCase(String nome);
 	
-	@Query(value = " SELECT c from ItemCompra c where c.compra.id = :compra_id")
+	@Query(value = " SELECT c from ItemCompra c where c.compra.id = :compra_id order by c.item")
 	public List<ItemCompra> listaItens (@Param("compra_id")Integer compraId);
 	
 //	@Query(value = "from compra where data > :ano or (ano = :ano and semestre >= :semestre)")

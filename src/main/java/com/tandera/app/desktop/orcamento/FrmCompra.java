@@ -12,10 +12,10 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -69,10 +69,10 @@ public class FrmCompra extends Formulario {
 
 	@Autowired
 	private CompraRepository compraRepository;
-	
+
 	@Autowired
 	private PessoaRepository pessoaRepository;
-	
+
 	private CategoriaService categoriaService;
 	private MarcaRepository marcaRepository;
 	private TamanhoRepository tamanhoRepository;
@@ -84,10 +84,10 @@ public class FrmCompra extends Formulario {
 	private ItemCompra itemCompraSelecionado;
 	private MascaraPreco mascaraPreco;
 
-	//CAMPOS COMPRA
+	// CAMPOS COMPRA
 	private SSCampoNumero txtCodigo = new SSCampoNumero();
 	private SSCampoDataHora txtData = new SSCampoDataHora();
-	private SSCaixaCombinacao cboConsignado = new SSCaixaCombinacao();	
+	private SSCaixaCombinacao cboConsignado = new SSCaixaCombinacao();
 	private SSCaixaCombinacao cboStatus = new SSCaixaCombinacao();
 	private SSCampoNumero txtIdPessoa = new SSCampoNumero();
 	private SSCampoTexto txtNome = new SSCampoTexto();
@@ -97,7 +97,7 @@ public class FrmCompra extends Formulario {
 	private SSCampoNumero txtTroca = new SSCampoNumero();
 	private SSCampoNumero txtDoacao = new SSCampoNumero();
 
-	//CAMPOS ITEM COMPRA
+	// CAMPOS ITEM COMPRA
 	private SSCampoTexto txtItem = new SSCampoTexto();
 	private SSCaixaCombinacao cboCategoria = new SSCaixaCombinacao();
 	private SSCaixaCombinacao cboMarca = new SSCaixaCombinacao();
@@ -107,11 +107,7 @@ public class FrmCompra extends Formulario {
 	private SSCaixaCombinacao cboMarkup = new SSCaixaCombinacao();
 	private SSCampoNumero txtQtde = new SSCampoNumero();
 	private SSCampoNumero txtValor = new SSCampoNumero();
-
-	private SSBotao cmdSalvar = new SSBotao();
-	private SSBotao cmdSair = new SSBotao();
-	private JCheckBox chkNovo = new JCheckBox("Novo?");
-	private JCheckBox chkNovoItem = new JCheckBox("Novo?");
+	private SSCampoNumero txtValorTotalItem = new SSCampoNumero();
 
 	private JScrollPane scroll = new JScrollPane();
 	private SSGrade tabela = new SSGrade();
@@ -121,41 +117,47 @@ public class FrmCompra extends Formulario {
 	// private final JPanel panel = new JPanel();
 	private final JPanel panel_grade = new JPanel();
 	private final JPanel panel_inclusao = new JPanel();
-	private final JButton btnIncluir = new JButton("Incluir");
-	private final JButton btnAlterar = new JButton("Alterar");
-	private final JButton btnExcluirItem = new JButton("Excluir");
-	private final SSBotao salvarItem = new SSBotao();
 	private final JPanel panel = new JPanel();
 	
-	/*
-	 *  variaveis de classe
-    */
-	private Integer vcContadorDeItens;
-	private String acao; //NOVO | ALTERAR | EXCLUIR | CONSULTAR
+	// botoes
+	private SSBotao cmdAprovado = new SSBotao();
+	private SSBotao cmdReprovado = new SSBotao();
+	private SSBotao cmdSalvar = new SSBotao();
+	private SSBotao cmdSair = new SSBotao();
+	private JCheckBox chkNovo = new JCheckBox("Novo?");
+	private JCheckBox chkNovoItem = new JCheckBox("Novo?");
 	
+	private final SSBotao cmdIncluir = new SSBotao(); //new JButton("Incluir");
+	private final SSBotao cmdAlterar = new SSBotao(); //new JButton("Alterar");
+	private final SSBotao cmdExcluirItem = new SSBotao(); //new JButton("Excluir");
+	private final SSBotao cmdSalvarItem = new SSBotao(); //new SSBotao();
 	
-	@Autowired
-	public FrmCompra(CategoriaService categoriaService
-					 ,TamanhoRepository tamanhoRepository
-					 ,MarcaRepository marcaRepository
-					 ,EstadoRepository estadoRepository
-					 ,MascaraPrecoRepository mascaraPrecoRepository
-					 ,MarkupRepository markupRepository) {
 
-		
+
+	/*
+	 * variaveis de classe
+	 */
+	
+	private Integer vcContadorDeItens;
+	private String acao; // NOVO | ALTERAR | EXCLUIR | CONSULTAR
+
+	@Autowired
+	public FrmCompra(CategoriaService categoriaService, TamanhoRepository tamanhoRepository,
+			MarcaRepository marcaRepository, EstadoRepository estadoRepository,
+			MascaraPrecoRepository mascaraPrecoRepository, MarkupRepository markupRepository) {
+
 		this.categoriaService = categoriaService;
 		this.tamanhoRepository = tamanhoRepository;
 		this.marcaRepository = marcaRepository;
 		this.estadoRepository = estadoRepository;
 		this.mascaraPrecoRepository = mascaraPrecoRepository;
 		this.markupRepository = markupRepository;
-		
+
 		getConteudo().setBackground(Color.YELLOW);
 		getConteudo().setLayout(null);
 		panel_grade.setBackground(Color.MAGENTA);
-		panel_grade.setBounds(0, 190, 940,270); //903, 270);
+		panel_grade.setBounds(0, 190, 940, 270); // 903, 270);
 		getConteudo().add(panel_grade);
-		
 
 		configurarCamposTabela();
 		configurarConstraintsGrid();
@@ -164,24 +166,24 @@ public class FrmCompra extends Formulario {
 		init();
 		panel_inclusao.setVisible(false);
 		setPreferredSize(new Dimension(883, 543));
-		//setSize(new Dimension(883, 543));		
+		// setSize(new Dimension(883, 543));
 	}
 
 	private void init() {
 		super.setTitulo("Orçamento");
 		super.setDescricao("Lançamentos de Orçamentos");
+		super.getRodape().add(cmdAprovado);
+		super.getRodape().add(cmdReprovado);
 		super.getRodape().add(chkNovo);
 		super.getRodape().add(cmdSalvar);
 		super.getRodape().add(cmdSair);
-		
-		cboStatus.setItens(StatusOrcamento.values());
-		cboConsignado.setItens(SimNao.values());
-		
+
 		adicionarListner();
 		configurarCamposCompra();
 		configurarCamposItemCompra();
+		configuraBotoes();
 		load();
-	
+
 	}
 
 	private void configurarCamposCompra() {
@@ -203,10 +205,14 @@ public class FrmCompra extends Formulario {
 
 		cboConsignado.setBounds(300, 5, 100, 50);
 		cboConsignado.setRotulo("Consignado");
-		panelCampos.add(cboConsignado);	
-		
+		cboConsignado.setItens(SimNao.values());
+		panelCampos.add(cboConsignado);
+
 		cboStatus.setBounds(656, 5, 205, 50);
 		cboStatus.setRotulo("Status");
+		cboStatus.setEnabled(false);
+		cboStatus.setItens(StatusOrcamento.values());
+		cboStatus.setValue(StatusOrcamento.valueOf("N"));
 		panelCampos.add(cboStatus);
 
 		txtIdPessoa.setBounds(10, 57, 80, 50);
@@ -253,69 +259,86 @@ public class FrmCompra extends Formulario {
 
 		cmdSair.setText("Fechar");
 		cmdSalvar.setText("Salvar");
+		cmdAprovado.setText("Aprovar");
+		cmdReprovado.setText("Reprovar");
+
+		cmdIncluir.setText("Incluir"); 
+		cmdIncluir.setIcone("novo");
+		cmdAlterar.setText("Alterar"); 
+		cmdExcluirItem.setText("Excluir");  
+		cmdSalvarItem.setText("Salvar");  
 
 	}
-	
+
 	private void configurarCamposItemCompra() {
 		FlowLayout fl_panel_inclusao = new FlowLayout(FlowLayout.LEFT, 5, 5);
 		panel_inclusao.setLayout(fl_panel_inclusao);
-		
+
 		panel_inclusao.add(txtItem);
 		txtItem.setComponenteTamanhoPreferido(new Dimension(40, 20));
 		txtItem.setRotulo("Item");
 		txtItem.setEnabled(false);
-		
+
 		panel_inclusao.add(cboCategoria);
 		cboCategoria.setComponenteTamanhoPreferido(new Dimension(100, 20));
 		cboCategoria.setRotulo("Categoria");
-		
+
 		panel_inclusao.add(cboMarca);
 		cboMarca.setComponenteTamanhoPreferido(new Dimension(100, 20));
 		cboMarca.setRotulo("Marca");
-		
+
 		panel_inclusao.add(cboTamanho);
 		cboTamanho.setComponenteTamanhoPreferido(new Dimension(120, 20));
 		cboTamanho.setRotulo("Tamanho");
-		
+
 		panel_inclusao.add(cboQualidade);
 		cboQualidade.setComponenteTamanhoPreferido(new Dimension(100, 20));
 		cboQualidade.setRotulo("Qualidade");
-		
+
 		panel_inclusao.add(cboMascara);
 		cboMascara.setComponenteTamanhoPreferido(new Dimension(80, 20));
 		cboMascara.setRotulo("Mascara");
-		
+
 		panel_inclusao.add(cboMarkup);
 		cboMarkup.setComponenteTamanhoPreferido(new Dimension(60, 20));
 		cboMarkup.setRotulo("Peso");
-		
+
 		panel_inclusao.add(txtQtde);
-		txtQtde.setComponenteTamanhoPreferido(new Dimension(60, 20));
+		txtQtde.setComponenteTamanhoPreferido(new Dimension(50, 20));
 		txtQtde.setRotulo("Qtde");
-		
+
 		panel_inclusao.add(txtValor);
-		txtValor.setComponenteTamanhoPreferido(new Dimension(50, 20));
-		txtValor.setRotulo("Valor");
+		txtValor.setComponenteTamanhoPreferido(new Dimension(60, 20));
+		txtValor.setRotulo("Vl. Unitário");
+		
+		panel_inclusao.add(txtValorTotalItem);
+		txtValorTotalItem.setComponenteTamanhoPreferido(new Dimension(60,20));
+		txtValorTotalItem.setRotulo("Total");
+		txtValorTotalItem.setBackground(Color.YELLOW);
+		txtValorTotalItem.setForeground(Color.BLUE);;
+		txtValorTotalItem.setCampoAtualizavel(false);
+		
+		//configurações do painel de itens de inclusao
 		panel.setPreferredSize(new Dimension(85, 50));
 		panel.setMinimumSize(new Dimension(100, 100));
 		panel.setBounds(new Rectangle(0, 0, 100, 100));
 		panel.setAlignmentY(0.0f);
 		panel.setAlignmentX(0.0f);
-		
+
 		panel_inclusao.add(panel);
 		panel.setLayout(null);
-		salvarItem.setBounds(0, 25, 83, 25);
-		panel.add(salvarItem);
-		salvarItem.setAlignmentY(java.awt.Component.BOTTOM_ALIGNMENT);
-		salvarItem.setText("Salvar");
-		
-		
+		cmdSalvarItem.setBounds(0, 25, 83, 25);
+		panel.add(cmdSalvarItem);
+		cmdSalvarItem.setAlignmentY(java.awt.Component.BOTTOM_ALIGNMENT);
+
 		chkNovoItem.setBounds(0, 0, 55, 23);
 		panel.add(chkNovoItem);
-		
+
 	}
 
 	private void adicionarListner() {
+		
+	
 		// Listners = Comandos = Eventos
 		cmdSalvar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -327,44 +350,60 @@ public class FrmCompra extends Formulario {
 				sair();
 			}
 		});
-		btnIncluir.addActionListener(new ActionListener() {
+		cmdIncluir.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				novoItem();
 			}
 		});
-		btnAlterar.addActionListener(new ActionListener() {
+		cmdAlterar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				novoItem();
 			}
 		});
-		
-		btnExcluirItem.addActionListener(new ActionListener() {
+
+		cmdExcluirItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				excluirItem();
 			}
 		});
-		
-		salvarItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				adicionarItem();
+
+
+		cboMascara.addValidacaoListener(new ValidacaoListener() {
+
+			@Override
+			public void validacaoListener(ValidacaoEvento evento) {
+
+				buscaValorUnitario();
+				calculaValorTotalInclusao();
 			}
 		});
 		
-		cboMascara.addValidacaoListener(new ValidacaoListener() {
-			
+		txtQtde.addValidacaoListener(new ValidacaoListener() {
 			@Override
 			public void validacaoListener(ValidacaoEvento evento) {
-				
-				buscaValorUnitario();
+				calculaValorTotalInclusao();
 			}
-		}); 
-		
+		});
 		cboMarkup.addValidacaoListener(new ValidacaoListener() {
-			
+
 			@Override
 			public void validacaoListener(ValidacaoEvento arg0) {
 				buscaValorUnitario();
-				
+				calculaValorTotalInclusao();
+			}
+		});
+		
+		cmdAprovado.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				aprovarOrcto();
+			}
+
+
+		});
+		
+		cmdSalvarItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				adicionarItem();
 			}
 		});
 	}
@@ -409,7 +448,6 @@ public class FrmCompra extends Formulario {
 		tabela.getModeloTabela().addColumn("Qtde");
 		tabela.getModeloTabela().addColumn("Vl. Unit.");
 		tabela.getModeloTabela().addColumn("Vl. Total");
-		
 
 		tabela.getModeloColuna().getColumn(0).setPreferredWidth(40);
 		tabela.getModeloColuna().getColumn(1).setPreferredWidth(100);
@@ -421,7 +459,6 @@ public class FrmCompra extends Formulario {
 		tabela.getModeloColuna().getColumn(7).setPreferredWidth(60);
 		tabela.getModeloColuna().getColumn(8).setPreferredWidth(60);
 		tabela.getModeloColuna().getColumn(9).setPreferredWidth(60);
-		
 
 		tabela.getModeloColuna().setCampo(0, "item");
 		tabela.getModeloColuna().setCampo(1, "categoria.descr");
@@ -434,69 +471,63 @@ public class FrmCompra extends Formulario {
 		tabela.getModeloColuna().setAlinhamentoColuna(7, SwingConstants.RIGHT);
 		tabela.getModeloColuna().setCampo(8, "valor");
 		tabela.getModeloColuna().setAlinhamentoColuna(8, SwingConstants.RIGHT);
-		//tabela.getModeloColuna().setMascara(8,"##0.00");
+		// tabela.getModeloColuna().setMascara(8,"##0.00");
 		tabela.getModeloColuna().setCampo(9, "valorTotal");
 		tabela.getModeloColuna().setAlinhamentoColuna(9, SwingConstants.RIGHT);
-		//tabela.getModeloColuna().setMascara(9,"##0.00");
+		// tabela.getModeloColuna().setMascara(9,"##0.00");
 
 	}
 
 	private void adicionarScrollGrade() {
-		
+
 		panel_inclusao.setBackground(Color.GREEN);
 		scroll.setViewportBorder(new LineBorder(Color.BLACK));
 
 		scroll.setViewportView(tabela);
-		
+
 		JPanel panel_radape = new JPanel();
 		FlowLayout flowLayout = (FlowLayout) panel_radape.getLayout();
 		flowLayout.setAlignment(FlowLayout.LEFT);
 		panel_radape.setBackground(Color.BLUE);
 		GroupLayout gl_panel_grade = new GroupLayout(panel_grade);
-		gl_panel_grade.setHorizontalGroup(
-			gl_panel_grade.createParallelGroup(Alignment.LEADING)
+		gl_panel_grade.setHorizontalGroup(gl_panel_grade.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_panel_grade.createSequentialGroup()
-				.addGroup(gl_panel_grade.createParallelGroup(Alignment.TRAILING, false)
-				.addComponent(scroll, Alignment.LEADING)
-				.addComponent(panel_inclusao, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 940, Short.MAX_VALUE))
-				.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-				.addComponent(panel_radape, GroupLayout.DEFAULT_SIZE, 871, Short.MAX_VALUE)
-		);
-		gl_panel_grade.setVerticalGroup(
-			gl_panel_grade.createParallelGroup(Alignment.LEADING)
+						.addGroup(gl_panel_grade.createParallelGroup(Alignment.TRAILING, false)
+								.addComponent(scroll, Alignment.LEADING).addComponent(panel_inclusao, Alignment.LEADING,
+										GroupLayout.DEFAULT_SIZE, 940, Short.MAX_VALUE))
+						.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+				.addComponent(panel_radape, GroupLayout.DEFAULT_SIZE, 871, Short.MAX_VALUE));
+		gl_panel_grade.setVerticalGroup(gl_panel_grade.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_panel_grade.createSequentialGroup()
-				.addComponent(panel_inclusao, GroupLayout.PREFERRED_SIZE, 69, GroupLayout.PREFERRED_SIZE)
-				.addPreferredGap(ComponentPlacement.RELATED)
-				.addComponent(scroll, GroupLayout.PREFERRED_SIZE, 139, GroupLayout.PREFERRED_SIZE)
-				.addPreferredGap(ComponentPlacement.RELATED)
-				.addComponent(panel_radape, GroupLayout.DEFAULT_SIZE, 39, Short.MAX_VALUE)
-				.addContainerGap())
-		);
-		
-		panel_radape.add(btnIncluir);
-		panel_radape.add(btnAlterar);
-		panel_radape.add(btnExcluirItem);
+						.addComponent(panel_inclusao, GroupLayout.PREFERRED_SIZE, 69, GroupLayout.PREFERRED_SIZE)
+						.addPreferredGap(ComponentPlacement.RELATED)
+						.addComponent(scroll, GroupLayout.PREFERRED_SIZE, 139, GroupLayout.PREFERRED_SIZE)
+						.addPreferredGap(ComponentPlacement.RELATED)
+						.addComponent(panel_radape, GroupLayout.DEFAULT_SIZE, 39, Short.MAX_VALUE).addContainerGap()));
+
+		panel_radape.add(cmdIncluir);
+		panel_radape.add(cmdAlterar);
+		panel_radape.add(cmdExcluirItem);
 		panel_grade.setLayout(gl_panel_grade);
 
 	}
-
-
 
 	private void buscaValorUnitario() {
 		this.mascaraPreco = ((MascaraPreco) cboMascara.getValue());
 		BigDecimal valorMascara = BigDecimal.ZERO;
 		BigDecimal valorMarkup = BigDecimal.ZERO;
-		if (this.cboMarkup.getValue() != null){
+		if (this.cboMarkup.getValue() != null) {
 			valorMarkup = ((Markup) this.cboMarkup.getValue()).getValor();
 			valorMascara = this.mascaraPreco.getValor();
-			
-			if(valorMarkup.doubleValue() != 0){
+
+			if (valorMarkup.doubleValue() != 0) {
 				BigDecimal resultado = valorMascara.divide(valorMarkup, 2, RoundingMode.DOWN);
 				txtValor.setNumero(resultado);
 			}
 		}
-		
+
 	}
+
 	private void atribuir() {
 		try {
 			txtCodigo.setValue(compra.getId());
@@ -525,19 +556,19 @@ public class FrmCompra extends Formulario {
 
 	private void salvar() {
 		try {
-			if (this.acao.compareTo("EXCLUIR") == 0) {
-				
-				SSMensagem.informa("antes de salvar!!");	
-				compra.getItemCompra().forEach(System.out::println);
-				
+			if (this.acao.equals(Constantes.ACAO_EXCLUSAO)) {
+
+				SSMensagem.informa("antes de salvar!!");
+				//compra.getItemCompra().forEach(System.out::println);
+
 				compraRepository.saveAndFlush(compra);
-				SSMensagem.informa("Item Excluido com sucesso!!");				
-			} else {	
+				SSMensagem.informa("Item Excluido com sucesso!!");
+			} else {
 				compra.setData(txtData.getDataHora());
 				compra.setStatus((StatusOrcamento) cboStatus.getValue());
-				
+
 				Pessoa pessoa = pessoaRepository.findById(txtIdPessoa.getInteger());
-				
+
 				compra.setPessoa(pessoa);
 				compra.setNome(txtNome.getText());
 				compra.setTelefone(txtTelefone.getText());
@@ -546,28 +577,29 @@ public class FrmCompra extends Formulario {
 				compra.setVlTroca(BigDecimal.valueOf(txtTroca.getDouble()));
 				compra.setVlDoacao(BigDecimal.valueOf(txtDoacao.getDouble()));
 				compra.setConsignado((SimNao) cboConsignado.getValue());
-				
+
 				if (compra.getData() == null || compra.getStatus() == null || compra.getNome() == null
 						|| compra.getNome().isEmpty() || compra.getTelefone() == null
 						|| compra.getTelefone().isEmpty()) {
 					SSMensagem.avisa("Dados incompletos");
 					return;
 				}
-				
-				// dao.gravar(operacao, entidade);
-				
+
 				compraRepository.save(compra);
-				
+				this.acao = Constantes.ACAO_CONSULTAR;
 				SSMensagem.informa("Orçamento de Compra registrado com sucesso!!");
 				novo();
-			} 
-			
-			
-			
+			}
+
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(null, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
 		}
 	}
+
+	/*
+	 * public void aprovar( ) { if (cboStatus.getItens() = 'A' ) {
+	 * SSMensagem.avisa("Pedido já aprovado!!!"); } }
+	 */
 
 	private void novo() {
 		if (chkNovo.isSelected()) {
@@ -579,15 +611,22 @@ public class FrmCompra extends Formulario {
 	private void sair() {
 		super.fechar();
 	}
-	
+
 	private void novoItem() {
+		this.acao = Constantes.ACAO_NOVO;
 		panel_inclusao.setVisible(true);
 	}
-	
+
 	private void alterarItem() {
+		this.itemCompraSelecionado = (ItemCompra) tabela.getLinhaSelecionada();
+		if (this.itemCompraSelecionado == null) {
+			SSMensagem.avisa("Selecione um item da lista");
+			return;
+		}
+		this.acao = Constantes.ACAO_ALTERAR;
 		panel_inclusao.setVisible(true);
 	}
-	
+
 	private void excluirItem() {
 		ItemCompra itemCompra = (ItemCompra) tabela.getLinhaSelecionada();
 		if (itemCompra == null) {
@@ -595,57 +634,30 @@ public class FrmCompra extends Formulario {
 			return;
 		}
 
-		if (SSMensagem.confirma("Confirma exclusão do Registro (" + itemCompra.getItem() + "-"+ itemCompra.getCategoria().getDescr()+")?")){
+		if (SSMensagem.confirma("Confirma exclusão do Registro (" + itemCompra.getItem() + "-"
+				+ itemCompra.getCategoria().getDescr() + ")?")) {
 			this.acao = Constantes.ACAO_EXCLUSAO;
-
-			//tabela.getModeloTabela().fireTableRowsDeleted(tabela.getSelectedRow(), tabela.getSelectedRow());
-
-            compraRepository.deleteItemCompra(itemCompra.getId());
-            compra.getItemCompra().remove(itemCompra);
-            //compra.setItemCompra(compraRepository.listaItens(compra.getId()));
-			//tabela.remove(tabela.getSelectedRow());
-			//salvar();
-
+			compraRepository.deleteItemCompra(itemCompra.getId());
+			compra.getItemCompra().remove(itemCompra);
+			compra.setItemCompra(numeraItens(compra.getItemCompra()));
+			salvar();
 			tabela.setValue(compra.getItemCompra());
-			//listaItens();
 			this.acao = Constantes.ACAO_CONSULTAR;
-			
 		}
-		
-	}
-	
-	private boolean validaItens() {
-		boolean retorno = true;
 
-		if (
-		      !Biblioteca.temValorValido(cboMascara) &&
-		      !Biblioteca.temValorValido(cboCategoria) &&
-		      !Biblioteca.temValorValido(cboMarca) &&
-		      !Biblioteca.temValorValido(cboTamanho) &&
-		      !Biblioteca.temValorValido(cboQualidade) &&
-		      !Biblioteca.temValorValido(cboMarkup) &&
-		      !Biblioteca.temValorValido(txtQtde,"I")  &&
-		      !Biblioteca.temValorValido(txtValor,"N")  &&
-		      !Biblioteca.temValorValido(cboMascara)
-		    ) {
-			SSMensagem.avisa("Falta dados para ser gravado!" );
-			retorno = false;
-		}
-			
-		return retorno;
 	}
-	
-	private void adicionarItem(){
-		this.acao = Constantes.ACAO_NOVO;
-		List<ItemCompra> listaDeItens = new ArrayList<ItemCompra>();;
+
+	private void adicionarItem() {
+		//this.acao = Constantes.ACAO_NOVO;
+		List<ItemCompra> listaDeItens = new ArrayList<ItemCompra>();
 		ItemCompra itemCompra;
-		
-		if (this.acao == Constantes.ACAO_NOVO){
-			vcContadorDeItens++;
+
+		if (this.acao == Constantes.ACAO_NOVO) {
 			itemCompra = new ItemCompra();
 		} else {
 			itemCompra = this.itemCompraSelecionado;
 		}
+		
 		if (validaItens()) {
 			this.mascaraPreco = ((MascaraPreco) cboMascara.getValue());
 			itemCompra.setCategoria((Categoria) cboCategoria.getValue());
@@ -654,76 +666,152 @@ public class FrmCompra extends Formulario {
 			itemCompra.setEstado((Estado) cboQualidade.getValue());
 			itemCompra.setMascaraPreco(this.mascaraPreco);
 			itemCompra.setMarkup((Markup) cboMarkup.getValue());
-			itemCompra.setQtde(txtQtde.getInteger());			
+			itemCompra.setQtde(txtQtde.getInteger());
 			itemCompra.setValor(BigDecimal.valueOf(txtValor.getDouble()));
 			itemCompra.setCompra(compra);
 			itemCompra.setItem(vcContadorDeItens);
-			
+
 			BigDecimal mascara = BigDecimal.ZERO;
 			mascara = Biblioteca.descriptoStringToBigDecimal(this.mascaraPreco.getMascara());
 			itemCompra.setVlMascara(mascara);
+			listaDeItens = compra.getItemCompra();
 			listaDeItens.add(itemCompra);
+			listaDeItens = numeraItens(listaDeItens);
 			this.compra.setItemCompra(listaDeItens);
+			tabela.setValue(listaDeItens);
 		}
-		
+
 		// limpar campos de adicao/alteração de itens
 		limparPainelInclusao();
-		listaItens();
-		
-		if (!chkNovoItem.isSelected()) {		
+		loadItens();
+
+		if (!chkNovoItem.isSelected()) {
 			panel_inclusao.setVisible(false);
 		}
+	}
+
+	private List<ItemCompra> numeraItens(List<ItemCompra> lista){
+		List<ItemCompra> listaRetorno = new ArrayList<ItemCompra>();
+		AtomicInteger contador = new AtomicInteger(1);
+		
+		lista.forEach( System.out::println ); 
+		
+		lista.forEach(item->{
+			item.setItem(contador.getAndIncrement());
+			System.out.println(contador);
+			System.out.println(item);
+			listaRetorno.add(item);
+		});
+		return listaRetorno;
 	}
 	
 	private void limparPainelInclusao() {
 		cboCategoria.setValue(null);
-		cboMascara.setValue(null);		
+		cboMascara.setValue(null);
 		cboMarca.setValue(null);
 		cboTamanho.setValue(null);
 		cboMarkup.setValue(null);
 		txtQtde.setText(null);
 		txtValor.setText(null);
+		txtValorTotalItem.setText(null);
+		cboQualidade.setText(null);
 	}
-	
-	//@Override
+
+	private void calculaValorTotalInclusao() {
+		if (Biblioteca.temValorValido(txtQtde, "I") &&
+		    Biblioteca.temValorValido(txtValor, "N")) {
+			int qtd = Integer.parseInt(txtQtde.getText());
+			
+			BigDecimal valorUnitario = txtValor.getBigDecimal();
+			BigDecimal resultado = valorUnitario.multiply( new BigDecimal(qtd));
+			txtValorTotalItem.setNumero(resultado);
+		}
+	}
+	// @Override
 	public void load() {
 		this.acao = Constantes.ACAO_CONSULTAR;
 		cboCategoria.setItens(categoriaService.listarTodos(), "descr");
-		
+
 		List<Marca> marca = marcaRepository.findAll();
 		cboMarca.setItens(marca, "descr");
-		
+
 		List<Tamanho> tamanho = tamanhoRepository.findAll();
 		cboTamanho.setItens(tamanho, "descr");
-		
+
 		List<Estado> estado = estadoRepository.findAll();
 		cboQualidade.setItens(estado, "descr");
-		
+
 		List<MascaraPreco> mascaraPreco = mascaraPrecoRepository.findAll();
 		cboMascara.setItens(mascaraPreco, "mascaraComValor");
-		
+
 		List<Markup> markup = markupRepository.findAll();
 		cboMarkup.setItens(markup, "sigla");
-		
-	
+
 	}
-	
+
 	private void loadItens() {
 		List<ItemCompra> lista = new ArrayList<ItemCompra>();
-		vcContadorDeItens = 0;
+		
 		try {
-			if (compra != null){
+			if (compra != null && this.acao.equals(Constantes.ACAO_CONSULTAR)) {
 				lista = compraRepository.listaItens(compra.getId());
 				vcContadorDeItens = lista.size();
+				tabela.setValue(lista);
 			}
-			tabela.setValue(lista);
 		} catch (Exception e) {
 			e.printStackTrace();
 			SSMensagem.erro(e.getMessage());
 		}
-	}	
-	
-	private void listaItens() {
-		loadItens();
 	}
+
+	private boolean validaItens() {
+		boolean retorno = true;
+
+		if (!Biblioteca.temValorValido(cboMascara) && !Biblioteca.temValorValido(cboCategoria)
+				&& !Biblioteca.temValorValido(cboMarca) && !Biblioteca.temValorValido(cboTamanho)
+				&& !Biblioteca.temValorValido(cboQualidade) && !Biblioteca.temValorValido(cboMarkup)
+				&& !Biblioteca.temValorValido(txtQtde, "I") && !Biblioteca.temValorValido(txtValor, "N")
+				&& !Biblioteca.temValorValido(cboMascara)) {
+			SSMensagem.avisa("Falta dados para ser gravado!");
+			retorno = false;
+		}
+
+		return retorno;
+	}
+	
+	private void aprovarOrcto() {
+		if (SSMensagem.confirma("Confirma Aprovação do Orçamento?")) {
+			cboStatus.setValue(StatusOrcamento.A);
+			salvar();
+		}
+	}
+	
+	public void configuraBotoes() {
+		StatusOrcamento status = (StatusOrcamento) cboStatus.getValue();
+		if (status == StatusOrcamento.R || status == StatusOrcamento.A) {
+			cmdAprovado.setEnabled(false);
+			cmdReprovado.setEnabled(false);
+			cmdSalvar.setEnabled(false);
+			//cmdSair.setEnabled(false);
+			chkNovo.setEnabled(false);
+			chkNovoItem.setEnabled(false);
+			cmdIncluir.setEnabled(false);
+			cmdAlterar.setEnabled(false);
+			cmdExcluirItem.setEnabled(false);
+			cmdSalvarItem.setEnabled(false);
+		} else {
+			cmdAprovado.setEnabled(true);
+			cmdReprovado.setEnabled(true);
+			cmdSalvar.setEnabled(true);
+			//cmdSair.setEnabled(true);
+			chkNovo.setEnabled(true);
+			chkNovoItem.setEnabled(true);
+			cmdIncluir.setEnabled(true);
+			cmdAlterar.setEnabled(true);
+			cmdExcluirItem.setEnabled(true);
+			cmdSalvarItem.setEnabled(true);
+		}
+	}
+	
+	
 }
