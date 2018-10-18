@@ -78,5 +78,12 @@ public  class Biblioteca {
 	    	}
 	    }
 	    return retorno;
-	}		
+	}
+	
+	public static String converteValor(String valor) {
+		
+		String retorno = valor.replace(".", "").replace(",", ".") ;
+		
+		return retorno;
+	}
 }
