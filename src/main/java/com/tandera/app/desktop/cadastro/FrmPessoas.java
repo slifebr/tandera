@@ -36,6 +36,11 @@ public class FrmPessoas extends FormularioConsulta {
 	
 	@Autowired
 	PessoaRepository dao;
+	
+	private String nome; // utilizado pela chamada de formularios de consulta,  podendo ser utulizado para inclusão
+	private Pessoa pessoaSelecionada;
+
+	
 
 	Class formInclusao = FrmPessoa.class;
 
@@ -47,10 +52,12 @@ public class FrmPessoas extends FormularioConsulta {
 	private SSCampoTexto txtFiltro = new SSCampoTexto();
 	private SSBotao cmdBuscar = new SSBotao();
 
+	private SSBotao cmdSelecionar = new SSBotao();
 	private SSBotao cmdIncluir = new SSBotao();
 	private SSBotao cmdAlterar = new SSBotao();
 	private SSBotao cmdFechar = new SSBotao();
-
+	
+	
 	public FrmPessoas() {
 		// JA PODERIA VIR DE FormularioConsulta
 		setTitulo("Consulta de Pessoas");
@@ -67,6 +74,7 @@ public class FrmPessoas extends FormularioConsulta {
 	}
 
 	private void configurarCamposPesquisa() {
+		
 		txtFiltro.setRotulo("Nome");
 		txtFiltro.setColunas(50);
 		cmdBuscar.setText("Buscar");
@@ -75,6 +83,9 @@ public class FrmPessoas extends FormularioConsulta {
 		cmdIncluir.setIcone("novo");
 		cmdAlterar.setText("Alterar");
 		cmdFechar.setText("Fechar");
+		cmdSelecionar.setText("Selecionar");
+		cmdSelecionar.setIcone("confirmar");
+		
 		txtFiltro.setColunas(30);
 	}
 
@@ -124,6 +135,7 @@ public class FrmPessoas extends FormularioConsulta {
 		getConteudo().add(filtro, BorderLayout.NORTH);
 		getConteudo().add(scroll, BorderLayout.CENTER);
 
+		getRodape().add(cmdSelecionar);
 		getRodape().add(cmdIncluir);
 		getRodape().add(cmdAlterar);
 		getRodape().add(cmdFechar);
@@ -149,6 +161,11 @@ public class FrmPessoas extends FormularioConsulta {
 		cmdAlterar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				alterar();
+			}
+		});
+		cmdSelecionar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				selecionar();
 			}
 		});
 	}
@@ -194,10 +211,44 @@ public class FrmPessoas extends FormularioConsulta {
 		exibirCadastro(entidade);
 	}
 
+	private void selecionar() {
+		setPessoaSelecionada( (Pessoa) tabela.getLinhaSelecionada());
+		if (pessoaSelecionada == null) {
+			SSMensagem.avisa("Selecione um item da lista");
+			return;
+		}
+		sair();
+	}	
+	
 	private void exibirCadastro(Pessoa entidade) {
 		Formulario frm = SpringDesktopApp.getBean(formInclusao);
 		frm.setEntidade(entidade);
-		this.exibir(frm);
+		if (!this.isDialogo(this) ) {
+			this.exibir(frm);
+		} else {
+			this.dialogo(frm);
+			txtFiltro.setText(((FrmPessoa) frm).getEntidade().getNome());
+			listar();
+			
+		}
 	}
+	
+	
+	public String getNome() {
+		return nome;
+	}
+
+	public void setNome(String nome) {
+		this.nome = nome;
+	}
+
+	public Pessoa getPessoaSelecionada() {
+		return pessoaSelecionada;
+	}
+
+	public void setPessoaSelecionada(Pessoa pessoaSelecionada) {
+		this.pessoaSelecionada = pessoaSelecionada;
+	}
+	
 
 }
