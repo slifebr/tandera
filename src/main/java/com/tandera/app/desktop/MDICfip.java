@@ -1,5 +1,6 @@
 package com.tandera.app.desktop;
 
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -34,6 +35,7 @@ public class MDICfip extends MDI {
 	// private AnnotationConfigApplicationContext context;
 	public MDICfip() {
 		setTitle("TANDERA - Gestão Comercial");
+	//	setIconImage(Imagem.icone("cfip","aplicacao","png"));
 		JMenu mnCadastros = new JMenu("Cadastros");
 		mnCadastros.setIcon(Imagem.png("0cadastros"));
 		JMenuItem mnConta = new JMenuItem("Conta");
