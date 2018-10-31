@@ -368,11 +368,11 @@ public class MDICfip extends MDI {
 		getBarraMenu().add(mnCadastros);
 		getBarraMenu().add(mnComercial);
 		getBarraMenu().add(mnOrcamento);
-		getBarraMenu().add(mnLancamentos);
-		getBarraMenu().add(mnConsultas);
-		getBarraMenu().add(mnRelatorios);
-		getBarraMenu().add(mnFerramentas);
-		getBarraMenu().add(mnAjuda);
+		//getBarraMenu().add(mnLancamentos);
+		//getBarraMenu().add(mnConsultas);
+		//getBarraMenu().add(mnRelatorios);
+		//getBarraMenu().add(mnFerramentas);
+		//getBarraMenu().add(mnAjuda);
 		this.setExtendedState(JFrame.MAXIMIZED_BOTH);
 	}
 

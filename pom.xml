@@ -131,7 +131,8 @@
 						<configuration>
 							<archive>
 								<manifest>
-									<mainClass> com.tandera.app.spring.SpringDesktopApp
+									<mainClass>
+										com.tandera.app.spring.SpringDesktopApp
 									</mainClass>
 								</manifest>
 							</archive>
