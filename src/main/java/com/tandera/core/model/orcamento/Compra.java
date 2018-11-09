@@ -83,6 +83,10 @@ public class Compra implements Serializable {
 	@Column(name = "vl_doacao", nullable = false)
 	private BigDecimal vlDoacao = BigDecimal.ZERO;
 	
+	@NotNull
+	@Column(name = "reprovado", nullable = false, columnDefinition = "integer default 0")
+	private Integer reprovado;
+	
 	@OneToMany(mappedBy = "compra", fetch=FetchType.EAGER, cascade = CascadeType.ALL,orphanRemoval = true)
 	private List<ItemCompra>itemCompra = new ArrayList<ItemCompra>(); 
 	
@@ -187,6 +191,14 @@ public class Compra implements Serializable {
 		this.consignado = consignado;
 	}
 
+	public Integer getReprovado() {
+		return reprovado;
+	}
+
+	public void setReprovado(Integer reprovado) {
+		this.reprovado = reprovado;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -216,7 +228,8 @@ public class Compra implements Serializable {
 	public String toString() {
 		return "Compra [id=" + id + ", data=" + data + ", status=" + status + ", pessoa=" + pessoa + ", nome=" + nome
 				+ ", telefone=" + telefone + ", obs=" + obs + ", vlDeposito=" + vlDeposito + ", vlTroca=" + vlTroca
-				+ ", vlDoacao=" + vlDoacao + "]";
+				+ ", vlDoacao=" + vlDoacao + ", Reprovado=" + reprovado + ", itemCompra=" + itemCompra + ", consignado="
+				+ consignado + "]";
 	}
 
 }

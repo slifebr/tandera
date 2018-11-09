@@ -199,9 +199,12 @@ public class FrmCompras extends FormularioConsulta {
 
 	private void exibirCadastro(Compra entidade) {
 		Formulario frm = SpringDesktopApp.getBean(formInclusao);
+		((FrmCompra)frm).limparCabecalho();
+		((FrmCompra)frm).load();		
 		frm.setEntidade(entidade);
 		this.exibir(frm);
 		((FrmCompra)frm).checaStatus();
+
 	}
 
 

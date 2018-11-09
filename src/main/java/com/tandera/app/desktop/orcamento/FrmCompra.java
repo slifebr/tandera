@@ -14,10 +14,10 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BinaryOperator;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -37,6 +37,7 @@ import com.tandera.core.dao.springjpa.EstadoRepository;
 import com.tandera.core.dao.springjpa.MarcaRepository;
 import com.tandera.core.dao.springjpa.MarkupRepository;
 import com.tandera.core.dao.springjpa.MascaraPrecoRepository;
+import com.tandera.core.dao.springjpa.ParamOrctoRepository;
 import com.tandera.core.dao.springjpa.PessoaRepository;
 import com.tandera.core.dao.springjpa.TamanhoRepository;
 import com.tandera.core.model.cadastro.Pessoa;
@@ -50,6 +51,7 @@ import com.tandera.core.model.enuns.SimNao;
 import com.tandera.core.model.enuns.StatusOrcamento;
 import com.tandera.core.model.orcamento.Compra;
 import com.tandera.core.model.orcamento.ItemCompra;
+import com.tandera.core.model.orcamento.ParamOrcto;
 import com.tandera.core.services.CategoriaService;
 import com.tandera.core.util.Biblioteca;
 import com.tandera.core.util.Constantes;
@@ -75,11 +77,12 @@ public class FrmCompra extends Formulario {
 	@Autowired
 	private CompraRepository compraRepository;
 
-	@Autowired
-	private PessoaRepository pessoaRepository;
-	
 	Class frmConsulta = FrmPessoas.class;
 
+	@Autowired
+	private PessoaRepository pessoaRepository;
+
+	private ParamOrctoRepository paramOrctoRepository;
 	private CategoriaService categoriaService;
 	private MarcaRepository marcaRepository;
 	private TamanhoRepository tamanhoRepository;
@@ -90,6 +93,7 @@ public class FrmCompra extends Formulario {
 	private Compra compra;
 	private ItemCompra itemCompraSelecionado;
 	private MascaraPreco mascaraPreco;
+	private ParamOrcto paramOrcto;
 
 	// CAMPOS COMPRA
 	private SSCampoNumero txtCodigo = new SSCampoNumero();
@@ -103,6 +107,7 @@ public class FrmCompra extends Formulario {
 	private SSCampoNumero txtDeposito = new SSCampoNumero();
 	private SSCampoNumero txtTroca = new SSCampoNumero();
 	private SSCampoNumero txtDoacao = new SSCampoNumero();
+	private SSCampoNumero txtTotalReprovados = new SSCampoNumero();
 
 	// CAMPOS ITEM COMPRA
 	private SSCampoTexto txtItem = new SSCampoTexto();
@@ -116,9 +121,9 @@ public class FrmCompra extends Formulario {
 	private SSCampoNumero txtValor = new SSCampoNumero();
 	private SSCampoNumero txtValorTotalItem = new SSCampoNumero();
 	private SSCampoNumero txtTotalOrcto = new SSCampoNumero();
-	private SSCampoNumero txtTotalProduto = new SSCampoNumero();
-	private SSCampoNumero txtTotalDesconto = new SSCampoNumero();
-	
+	private SSCampoNumero txtTotalItensOrcam = new SSCampoNumero();
+	private SSCampoNumero txtTotalProdutos = new SSCampoNumero();
+
 	private JScrollPane scroll = new JScrollPane();
 	private SSGrade tabela = new SSGrade();
 	/**
@@ -131,7 +136,7 @@ public class FrmCompra extends Formulario {
 	private final JPanel panelTotal = new JPanel();
 	private final SSToolBar toolBar = new SSToolBar();
 	private final JPanel panelToolBar1 = new JPanel();
-	
+
 	// botoes
 	private SSBotao cmdAprovado = new SSBotao();
 	private SSBotao cmdReprovado = new SSBotao();
@@ -139,28 +144,25 @@ public class FrmCompra extends Formulario {
 	private SSBotao cmdSair = new SSBotao();
 	private JCheckBox chkNovo = new JCheckBox("Novo?");
 	private JCheckBox chkNovoItem = new JCheckBox("Novo?");
-	
-	private final SSBotao cmdIncluir = new SSBotao(); //new JButton("Incluir");
-	private final SSBotao cmdAlterar = new SSBotao(); //new JButton("Alterar");
-	private final SSBotao cmdExcluir = new SSBotao(); //new JButton("Excluir");
-	private final SSBotao cmdSalvarItem = new SSBotao(); //new SSBotao();
-	
 
+	private final SSBotao cmdIncluir = new SSBotao(); // new JButton("Incluir");
+	private final SSBotao cmdAlterar = new SSBotao(); // new JButton("Alterar");
+	private final SSBotao cmdExcluir = new SSBotao(); // new JButton("Excluir");
+	private final SSBotao cmdSalvarItem = new SSBotao(); // new SSBotao();
 
 	/*
 	 * variaveis de classe
 	 */
-	
+
 	private Integer vcContadorDeItens;
 	private String acao; // NOVO | ALTERAR | EXCLUIR | CONSULTAR
 	private final SSBotao btnPessoas = new SSBotao();
-	
-
 
 	@Autowired
 	public FrmCompra(CategoriaService categoriaService, TamanhoRepository tamanhoRepository,
 			MarcaRepository marcaRepository, EstadoRepository estadoRepository,
-			MascaraPrecoRepository mascaraPrecoRepository, MarkupRepository markupRepository) {
+			MascaraPrecoRepository mascaraPrecoRepository, MarkupRepository markupRepository,
+			ParamOrctoRepository paramOrctoRepository) {
 
 		this.categoriaService = categoriaService;
 		this.tamanhoRepository = tamanhoRepository;
@@ -168,6 +170,7 @@ public class FrmCompra extends Formulario {
 		this.estadoRepository = estadoRepository;
 		this.mascaraPrecoRepository = mascaraPrecoRepository;
 		this.markupRepository = markupRepository;
+		this.paramOrctoRepository = paramOrctoRepository;
 
 		getConteudo().setBackground(SystemColor.control);
 		getConteudo().setLayout(null);
@@ -178,7 +181,7 @@ public class FrmCompra extends Formulario {
 		panel_inclusao.setBounds(0, 190, 924, 69);
 		getConteudo().add(panel_inclusao);
 		panel_inclusao.setVisible(false);
-		
+
 		configurarCamposTabela();
 		configurarConstraintsGrid();
 		adicionarScrollGrade();
@@ -205,22 +208,21 @@ public class FrmCompra extends Formulario {
 		load();
 
 	}
-    
+
 	private void configurarToolBar() {
 		toolBar.setBounds(0, 385, 924, 66);
 		toolBar.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 5));
 		getConteudo().add(toolBar);
 		panelToolBar1.setBackground(SystemColor.scrollbar);
-		
-		
+
 		panelToolBar1.add(cmdIncluir);
 		panelToolBar1.add(cmdAlterar);
-		panelToolBar1.add(cmdExcluir);  
+		panelToolBar1.add(cmdExcluir);
 		toolBar.add(panelToolBar1);
 		panelTotal.setBackground(SystemColor.scrollbar);
 		toolBar.add(panelTotal);
-    }
-    
+	}
+
 	private void configurarCamposCompra() {
 		JPanel panelCampos = super.getConteudo();
 		panelCampos.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
@@ -285,62 +287,76 @@ public class FrmCompra extends Formulario {
 		txtDeposito.setBounds(656, 109, 205, 25);
 		txtDeposito.setRotulo("Depósito ");
 		txtDeposito.setColunas(10);
+		txtDeposito.setEditavel(false);
 		panelCampos.add(txtDeposito);
+
 		txtTroca.getComponente().setBounds(30, 15, 175, 20);
 		txtTroca.setRotuloPosicao(PosicaoRotulo.ESQUERDA);
 
 		txtTroca.setBounds(656, 135, 205, 25);
 		txtTroca.setRotulo("Troca      ");
 		txtTroca.setColunas(10);
+		txtTroca.setEditavel(false);
 		panelCampos.add(txtTroca);
-		txtDoacao.setRotuloPosicao(PosicaoRotulo.ESQUERDA);
 
+		txtDoacao.setRotuloPosicao(PosicaoRotulo.ESQUERDA);
 		txtDoacao.setBounds(656, 161, 205, 25);
 		txtDoacao.setRotulo("Doação   ");
 		txtDoacao.setColunas(10);
+		txtDoacao.setEditavel(false);
 		panelCampos.add(txtDoacao);
 
 		cmdSair.setText("Fechar");
 		cmdSalvar.setText("Salvar");
 		cmdAprovado.setText("Aprovar");
 		cmdReprovado.setText("Reprovar");
-		cmdSalvarItem.setText("Salvar");  
+		cmdSalvarItem.setText("Salvar");
 		panelToolBar1.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 5));
-		
-				cmdIncluir.setText("Incluir"); 
-				cmdIncluir.setIcone("novo");
-				cmdAlterar.setText("Alterar");
-				cmdExcluir.setText("Excluir");  
-		txtTotalProduto.getComponente().setEnabled(false);
-		
-		txtTotalProduto.setRotulo("Total Produto");
-		txtTotalProduto.setCampoAtualizavel(false);
-		txtTotalProduto.setComponenteNegrito(true);
-		txtTotalProduto.setEnabled(false);
-		txtTotalProduto.setComponenteCorFundo(Color.YELLOW);
-		txtTotalProduto.setRotuloPosicao(PosicaoRotulo.TOPO);
-		txtTotalProduto.setColunas(10);
 
-		panelTotal.add(txtTotalProduto);
-		txtTotalDesconto.getComponente().setEnabled(false);
-		
-		txtTotalDesconto.setRotulo("- (Dep/Tro/Doa)");
-		txtTotalDesconto.setCampoAtualizavel(false);
-		txtTotalDesconto.setComponenteNegrito(true);
-		txtTotalDesconto.setEnabled(false);
-		txtTotalDesconto.setComponenteCorFundo(Color.YELLOW);
-		txtTotalDesconto.setRotuloPosicao(PosicaoRotulo.TOPO);
-		txtTotalDesconto.setColunas(10);		
-		panelTotal.add(txtTotalDesconto);
+		cmdIncluir.setText("Incluir");
+		cmdIncluir.setIcone("novo");
+		cmdAlterar.setText("Alterar");
+		cmdExcluir.setText("Excluir");
+		// txtTotalReprovados.getComponente().setEnabled(false);
+
+		txtTotalReprovados.setRotulo("Total Reprovados");
+		// txtTotalReprovados.setCampoAtualizavel(false);
+		txtTotalReprovados.setComponenteNegrito(true);
+		// txtTotalReprovados.setEnabled(false);
+		// txtTotalProduto.setComponenteCorFundo(Color.YELLOW);
+		txtTotalReprovados.setRotuloPosicao(PosicaoRotulo.TOPO);
+		txtTotalReprovados.setColunas(5);
+		panelTotal.add(txtTotalReprovados);
+
+		txtTotalItensOrcam.getComponente().setEnabled(false);
+		txtTotalItensOrcam.setRotulo("Total Itens Orçados");
+		txtTotalItensOrcam.setCampoAtualizavel(false);
+		txtTotalItensOrcam.setComponenteNegrito(true);
+		txtTotalItensOrcam.setEnabled(false);
+		txtTotalItensOrcam.setComponenteCorFundo(Color.YELLOW);
+		txtTotalItensOrcam.setRotuloPosicao(PosicaoRotulo.TOPO);
+		txtTotalItensOrcam.setColunas(5);
+		panelTotal.add(txtTotalItensOrcam);
 		txtTotalOrcto.getComponente().setEnabled(false);
-		
+
+		txtTotalProdutos.getComponente().setEnabled(false);
+		txtTotalProdutos.setRotulo("Total de Itens");
+		txtTotalProdutos.setCampoAtualizavel(false);
+		txtTotalProdutos.setComponenteNegrito(true);
+		txtTotalProdutos.setEnabled(false);
+		txtTotalProdutos.setComponenteCorFundo(Color.YELLOW);
+		txtTotalProdutos.setRotuloPosicao(PosicaoRotulo.TOPO);
+		txtTotalProdutos.setColunas(5);
+		panelTotal.add(txtTotalProdutos);
+		txtTotalProdutos.getComponente().setEnabled(false);
+
 		txtTotalOrcto.setRotulo("Total Orçamento");
 		txtTotalOrcto.setCampoAtualizavel(false);
 		txtTotalOrcto.setComponenteNegrito(true);
 		txtTotalOrcto.setEnabled(false);
 		txtTotalOrcto.setComponenteCorFundo(Color.YELLOW);
 		txtTotalOrcto.setRotuloPosicao(PosicaoRotulo.TOPO);
-		txtTotalOrcto.setColunas(10);		
+		txtTotalOrcto.setColunas(10);
 		panelTotal.add(txtTotalOrcto);
 
 	}
@@ -383,15 +399,16 @@ public class FrmCompra extends Formulario {
 		panel_inclusao.add(txtValor);
 		txtValor.setComponenteTamanhoPreferido(new Dimension(60, 20));
 		txtValor.setRotulo("Vl. Unitário");
-		
+
 		panel_inclusao.add(txtValorTotalItem);
-		txtValorTotalItem.setComponenteTamanhoPreferido(new Dimension(60,20));
+		txtValorTotalItem.setComponenteTamanhoPreferido(new Dimension(60, 20));
 		txtValorTotalItem.setRotulo("Total");
 		txtValorTotalItem.setBackground(Color.YELLOW);
-		txtValorTotalItem.setForeground(Color.BLUE);;
+		txtValorTotalItem.setForeground(Color.BLUE);
+		;
 		txtValorTotalItem.setCampoAtualizavel(false);
-		
-		//configurações do painel de itens de inclusao
+
+		// configurações do painel de itens de inclusao
 		panel.setPreferredSize(new Dimension(85, 50));
 		panel.setMinimumSize(new Dimension(100, 100));
 		panel.setBounds(new Rectangle(0, 0, 100, 100));
@@ -400,7 +417,7 @@ public class FrmCompra extends Formulario {
 
 		FlowLayout fl_panel_inclusao = new FlowLayout(FlowLayout.LEFT, 5, 5);
 		panel_inclusao.setLayout(fl_panel_inclusao);
-		
+
 		panel_inclusao.add(panel);
 		panel.setLayout(null);
 		cmdSalvarItem.setBounds(0, 25, 83, 25);
@@ -486,29 +503,41 @@ public class FrmCompra extends Formulario {
 			@Override
 			public void validacaoListener(ValidacaoEvento arg0) {
 				calculaValorTotalOrcto();
-				calculaValorTotalDesconto();
-				calculaValorTotalProduto();
+				calculaQuantidadeItens();
+				calculaTotalItens();
+				// calculaValorTotalDesconto();
+				// calculaValorTotalProduto();
 			}
 		});
 		txtDoacao.addValidacaoListener(new ValidacaoListener() {
 			@Override
 			public void validacaoListener(ValidacaoEvento arg0) {
 				calculaValorTotalOrcto();
-				calculaValorTotalDesconto();
-				calculaValorTotalProduto();
+				calculaQuantidadeItens();
+				calculaTotalItens();
+				// calculaValorTotalDesconto();
+				// calculaValorTotalProduto();
 			}
 		});
 		txtTroca.addValidacaoListener(new ValidacaoListener() {
 			@Override
 			public void validacaoListener(ValidacaoEvento arg0) {
 				calculaValorTotalOrcto();
-				calculaValorTotalDesconto();
-				calculaValorTotalProduto();
+				calculaQuantidadeItens();
+				calculaTotalItens();
+				// calculaValorTotalDesconto();
+				// calculaValorTotalProduto();
 			}
 		});
 		btnPessoas.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				showPessoa();
+			}
+		});
+		txtTotalReprovados.addValidacaoListener(new ValidacaoListener() {
+			@Override
+			public void validacaoListener(ValidacaoEvento evento) {
+				calculaTotalItens();
 			}
 		});
 	}
@@ -585,49 +614,45 @@ public class FrmCompra extends Formulario {
 
 	private void posicionaScroll(String posicao) {
 		// if (acao == null ||acao.equals(Constantes.ACAO_CONSULTAR)) {
-		// posicao = (D)own  | (U)p
+		// posicao = (D)own | (U)p
 		if (posicao.equals("U")) {
 			scroll.setBounds(0, 190, 924, 119 + (262 - 190));
 		} else {
 			scroll.setBounds(0, 190, 924, 119);
 		}
-	}	
+	}
+
 	private void adicionarScrollGrade() {
 
 		panel_inclusao.setBackground(SystemColor.activeCaptionBorder);
-		//scroll.setBounds(0, 262, 924, 119);
-		//scroll.setBounds(0, 190, 924, 119 + (262-190));
+		// scroll.setBounds(0, 262, 924, 119);
+		// scroll.setBounds(0, 190, 924, 119 + (262-190));
 		posicionaScroll("U");
 		getConteudo().add(scroll);
-		scroll.setViewportBorder(new BevelBorder(BevelBorder.LOWERED, Color.BLUE, Color.YELLOW, Color.GRAY, Color.GREEN));
+		scroll.setViewportBorder(
+				new BevelBorder(BevelBorder.LOWERED, Color.BLUE, Color.YELLOW, Color.GRAY, Color.GREEN));
 		tabela.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 		tabela.setFillsViewportHeight(true);
 		tabela.setQuantidadeLinhasVisiveis(15);
-        
-		scroll.setViewportView(tabela);
 
+		scroll.setViewportView(tabela);
 
 		toolBar.setBackground(SystemColor.scrollbar);
 		GroupLayout gl_panel_grade = new GroupLayout(panel_grade);
 		gl_panel_grade.setHorizontalGroup(
-			gl_panel_grade.createParallelGroup(Alignment.LEADING)
-				.addGap(0, 915, Short.MAX_VALUE)
-		);
+				gl_panel_grade.createParallelGroup(Alignment.LEADING).addGap(0, 915, Short.MAX_VALUE));
 		gl_panel_grade.setVerticalGroup(
-			gl_panel_grade.createParallelGroup(Alignment.LEADING)
-				.addGap(0, 175, Short.MAX_VALUE)
-		);
+				gl_panel_grade.createParallelGroup(Alignment.LEADING).addGap(0, 175, Short.MAX_VALUE));
 		panelTotal.setMaximumSize(new Dimension(40, 10));
 		panelTotal.setName("painelTotal");
 		panelTotal.setMinimumSize(new Dimension(40, 10));
 		FlowLayout flowLayout_1 = (FlowLayout) panelTotal.getLayout();
 		flowLayout_1.setAlignment(FlowLayout.RIGHT);
-		//toolBar.add(panelTotal);
-		
+		// toolBar.add(panelTotal);
 
 		panel_grade.setLayout(gl_panel_grade);
-	//	panel_grade.setBounds(0, 190, 924, 261); // 903, 270);
-	//	panel_grade.setSize(new Dimension(924, 261));
+		// panel_grade.setBounds(0, 190, 924, 261); // 903, 270);
+		// panel_grade.setSize(new Dimension(924, 261));
 
 	}
 
@@ -653,7 +678,7 @@ public class FrmCompra extends Formulario {
 			txtData.setValue(compra.getData());
 			cboStatus.setValue(compra.getStatus());
 			if (compra.getPessoa() != null) {
-			   txtIdPessoa.setValue(compra.getPessoa().getId());
+				txtIdPessoa.setValue(compra.getPessoa().getId());
 			}
 			txtNome.setValue(compra.getNome());
 			txtTelefone.setValue(compra.getTelefone());
@@ -661,6 +686,7 @@ public class FrmCompra extends Formulario {
 			txtDeposito.setValue(compra.getVlDeposito());
 			txtTroca.setValue(compra.getVlTroca());
 			txtDoacao.setValue(compra.getVlDoacao());
+			txtTotalReprovados.setValue(compra.getReprovado());
 			cboConsignado.setValue(compra.getConsignado());
 			txtData.requestFocus();
 			loadItens();
@@ -682,18 +708,18 @@ public class FrmCompra extends Formulario {
 				SSMensagem.informa("Item Excluido com sucesso!!");
 			} else {
 				compra.setData(txtData.getDataHora());
-				
+
 				if (cboStatus.getText().isEmpty()) {
-					System.out.println("aqui");
+
 					cboStatus.setValue(StatusOrcamento.N);
 				}
-				System.out.println("aqui 2");
+
 				compra.setStatus((StatusOrcamento) cboStatus.getValue());
+				if (!txtIdPessoa.getText().isEmpty()) {
+					Pessoa pessoa = pessoaRepository.findById(Integer.parseInt(txtIdPessoa.getText()));
+					compra.setPessoa(pessoa);
+				}
 
-				Pessoa pessoa = pessoaRepository.findById(Integer.parseInt(txtIdPessoa.getText()));
-
-				
-				compra.setPessoa(pessoa);
 				compra.setNome(txtNome.getText());
 
 				compra.setTelefone(txtTelefone.getText());
@@ -701,6 +727,7 @@ public class FrmCompra extends Formulario {
 				compra.setVlDeposito(BigDecimal.valueOf(txtDeposito.getDouble()));
 				compra.setVlTroca(BigDecimal.valueOf(txtTroca.getDouble()));
 				compra.setVlDoacao(BigDecimal.valueOf(txtDoacao.getDouble()));
+				compra.setReprovado(txtTotalReprovados.getInteger());
 				compra.setConsignado((SimNao) cboConsignado.getValue());
 
 				if (compra.getData() == null || compra.getStatus() == null || compra.getNome() == null
@@ -735,8 +762,8 @@ public class FrmCompra extends Formulario {
 			}
 		}
 		this.acao = Constantes.ACAO_CONSULTAR;
-		panel_inclusao.setVisible(false);	
-		//scroll.setBounds(0, 190, 924, 119 + (262-190));
+		panel_inclusao.setVisible(false);
+		// scroll.setBounds(0, 190, 924, 119 + (262-190));
 		posicionaScroll("U");
 		super.fechar();
 	}
@@ -745,10 +772,10 @@ public class FrmCompra extends Formulario {
 		this.acao = Constantes.ACAO_NOVO;
 		chkNovoItem.setEnabled(true);
 		scroll.setBounds(0, 262, 924, 119);
-		//posicionaScroll("D");
+		// posicionaScroll("D");
 		panel_inclusao.setVisible(true);
 		habilitaBotoes(false);
-		
+
 	}
 
 	private void alterarItem() {
@@ -758,7 +785,7 @@ public class FrmCompra extends Formulario {
 			return;
 		}
 		scroll.setBounds(0, 262, 924, 119);
-		//posicionaScroll("D");
+		// posicionaScroll("D");
 		this.acao = Constantes.ACAO_ALTERAR;
 		chkNovoItem.setSelected(false);
 		chkNovoItem.setEnabled(false);
@@ -766,7 +793,7 @@ public class FrmCompra extends Formulario {
 		panel_inclusao.setVisible(true);
 		habilitaBotoes(false);
 	}
-    
+
 	private void carregarItemSelecionado() {
 		txtItem.setValue(this.itemCompraSelecionado.getItem());
 		cboCategoria.setValue(this.itemCompraSelecionado.getCategoria());
@@ -779,7 +806,7 @@ public class FrmCompra extends Formulario {
 		txtValorTotalItem.setValue(this.itemCompraSelecionado.getValorTotal());
 		cboQualidade.setValue(this.itemCompraSelecionado.getEstado());
 	}
-	
+
 	private void excluirItem() {
 		ItemCompra itemCompra = (ItemCompra) tabela.getLinhaSelecionada();
 		if (itemCompra == null) {
@@ -803,14 +830,14 @@ public class FrmCompra extends Formulario {
 		List<ItemCompra> listaDeItens = new ArrayList<ItemCompra>();
 		ItemCompra itemCompra;
 
-		if (this.acao.equals( Constantes.ACAO_NOVO)) {
+		if (this.acao.equals(Constantes.ACAO_NOVO)) {
 			itemCompra = new ItemCompra();
 			vcContadorDeItens++; // = tabela.getRowCount() +1;
 		} else {
 			itemCompra = this.itemCompraSelecionado;
 			vcContadorDeItens = itemCompra.getItem();
 		}
-		
+
 		if (validaItens()) {
 			this.mascaraPreco = ((MascaraPreco) cboMascara.getValue());
 			itemCompra.setCategoria((Categoria) cboCategoria.getValue());
@@ -820,18 +847,20 @@ public class FrmCompra extends Formulario {
 			itemCompra.setMascaraPreco(this.mascaraPreco);
 			itemCompra.setMarkup((Markup) cboMarkup.getValue());
 			itemCompra.setQtde(txtQtde.getInteger());
-			itemCompra.setValor(BigDecimal.valueOf(txtValor.getDouble()));
+			if (!txtValor.getText().isEmpty()) {
+				itemCompra.setValor(BigDecimal.valueOf(txtValor.getDouble()));
+			}
 			itemCompra.setCompra(compra);
-			
+
 			BigDecimal mascara = BigDecimal.ZERO;
 			mascara = Biblioteca.descriptoStringToBigDecimal(this.mascaraPreco.getMascara());
 			itemCompra.setVlMascara(mascara);
 			listaDeItens = compra.getItemCompra();
-			if (this.acao.equals( Constantes.ACAO_NOVO)) {
+			if (this.acao.equals(Constantes.ACAO_NOVO)) {
 				itemCompra.setItem(vcContadorDeItens);
 				listaDeItens.add(itemCompra);
 				listaDeItens = numeraItens(listaDeItens);
-				
+
 			} else {
 				listaDeItens.remove(this.itemCompraSelecionado);
 				listaDeItens.add(itemCompra);
@@ -851,22 +880,22 @@ public class FrmCompra extends Formulario {
 		}
 	}
 
-	private List<ItemCompra> numeraItens(List<ItemCompra> lista){
+	private List<ItemCompra> numeraItens(List<ItemCompra> lista) {
 		List<ItemCompra> listaRetorno = new ArrayList<ItemCompra>();
 		AtomicInteger contador = new AtomicInteger(1);
-		
-		//lista.forEach( System.out::println ); 
-		
-		lista.forEach(item->{
+
+		// lista.forEach( System.out::println );
+
+		lista.forEach(item -> {
 			item.setItem(contador.getAndIncrement());
-			//System.out.println(contador);
-			//System.out.println(item);
+			// System.out.println(contador);
+			// System.out.println(item);
 			listaRetorno.add(item);
 		});
-		
+
 		return listaRetorno;
 	}
-	
+
 	private void limparPainelInclusao() {
 		cboCategoria.setValue(null);
 		cboMascara.setValue(null);
@@ -880,63 +909,87 @@ public class FrmCompra extends Formulario {
 		txtItem.setValue(null);
 	}
 
+	public void limparCabecalho() {
+		txtIdPessoa.setText(null);
+		txtObs.setText(null);
+		txtCodigo.setText(null);
+		txtData.setText(null);
+		txtDeposito.setText(null);
+		txtDoacao.setText(null);
+		txtTroca.setText(null);
+		txtTotalReprovados.setText(null);
+		txtNome.setText(null);
+		txtTelefone.setText(null);
+		txtTotalOrcto.setText(null);
+		cboConsignado.setText(null);
+		cboStatus.setText(null);
+	}
+
 	private void calculaValorTotalInclusao() {
-		if (Biblioteca.temValorValido(txtQtde, "I") &&
-		    Biblioteca.temValorValido(txtValor, "N")) {
+		if (Biblioteca.temValorValido(txtQtde, "I") && Biblioteca.temValorValido(txtValor, "N")) {
 			int qtd = Integer.parseInt(txtQtde.getText());
-			
+
 			BigDecimal valorUnitario = txtValor.getBigDecimal();
-			BigDecimal resultado = valorUnitario.multiply( new BigDecimal(qtd));
+			BigDecimal resultado = valorUnitario.multiply(new BigDecimal(qtd));
 			txtValorTotalItem.setNumero(resultado);
 		}
 	}
-	
+
+	private void calculaQuantidadeItens() {
+		Integer qtde = compra.getItemCompra().stream().map(item -> item.getQtde()).reduce(0, Integer::sum);
+		txtTotalItensOrcam.setText(qtde.toString());
+	}
+
 	private void calculaValorTotalOrcto() {
-		BigDecimal valorOrcto = compra.getItemCompra()
-				           			  .stream()
-				           			  .map(item->item.getValorTotal())
-				           			  .reduce(BigDecimal.ZERO,BigDecimal::add);
-		
-		/*BigDecimal valorOrcto = BigDecimal.ZERO;
-		
-		for (ItemCompra item : compra.getItemCompra()){
-			System.out.println(item.getItem() + " - " + item.getValorTotal());
-			valorOrcto = valorOrcto.add(item.getValorTotal());
-			System.out.println("Valor orcamento!" + valorOrcto);
-		};
-		*/
+		BigDecimal valorOrcto = compra.getItemCompra().stream().map(item -> item.getValorTotal())
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
 
-		
-		BigDecimal desconto = new BigDecimal(Biblioteca.converteValor(txtDeposito.getText()))
-				         .add(new BigDecimal(Biblioteca.converteValor(txtDoacao.getText())))
-				         .add(new BigDecimal(Biblioteca.converteValor(txtTroca.getText())));
+		/*
+		 * BigDecimal valorOrcto = BigDecimal.ZERO;
+		 * 
+		 * for (ItemCompra item : compra.getItemCompra()){
+		 * System.out.println(item.getItem() + " - " + item.getValorTotal()); valorOrcto
+		 * = valorOrcto.add(item.getValorTotal()); System.out.println("Valor orcamento!"
+		 * + valorOrcto); };
+		 */
 
-		valorOrcto = valorOrcto.subtract(desconto);
-		
-		txtTotalOrcto.setValue(valorOrcto);
-		
+		/*
+		 * BigDecimal desconto = new
+		 * BigDecimal(Biblioteca.converteValor(txtDeposito.getText())) .add(new
+		 * BigDecimal(Biblioteca.converteValor(txtDoacao.getText()))) .add(new
+		 * BigDecimal(Biblioteca.converteValor(txtTroca.getText())));
+		 * 
+		 * valorOrcto = valorOrcto.subtract(desconto);
+		 */
+		txtTotalOrcto.setText(valorOrcto.toString());
+		txtDeposito.setText(txtTotalOrcto.getText());
+
+		BigDecimal fatorTroca = paramOrcto.getTroca().divide(new BigDecimal("100")).add(new BigDecimal("1"));
+
+		// System.out.println("fator troca: " + fatorTroca);
+		txtTroca.setText(valorOrcto.multiply(fatorTroca).setScale(2, RoundingMode.HALF_EVEN).toString());
+
+		BigDecimal fatorDoacao = paramOrcto.getDoacao().divide(new BigDecimal("100")).add(new BigDecimal("1"));
+
+		// System.out.println("fator Doacao: " + fatorDoacao);
+		txtDoacao.setText(valorOrcto.multiply(fatorDoacao).setScale(2, RoundingMode.HALF_EVEN).toString());
+
 	}
 	
-	private void calculaValorTotalDesconto() {
-		
-		BigDecimal desconto = new BigDecimal(Biblioteca.converteValor(txtDeposito.getText()))
-				         .add(new BigDecimal(Biblioteca.converteValor(txtDoacao.getText())))
-				         .add(new BigDecimal(Biblioteca.converteValor(txtTroca.getText())));
-		
-		txtTotalDesconto.setValue(desconto);
-		
+	private void calculaTotalItens() {
+
+		if (Biblioteca.temValorValido(txtTotalReprovados, "I") && 
+			Biblioteca.temValorValido(txtTotalItensOrcam, "N")) {
+			
+			int reprovados =  Integer.parseInt(txtTotalReprovados.getText());
+			Integer qtdeTotal = Integer.parseInt(txtTotalItensOrcam.getText());
+			Integer resultado = qtdeTotal +reprovados;
+			txtTotalProdutos.setValue(resultado);
+			
+		}
+
 	}
-	
-	private void calculaValorTotalProduto() {
-		BigDecimal valorOrcto = compra.getItemCompra()
-				           			  .stream()
-				           			  .map(item->item.getValorTotal())
-				           			  .reduce(BigDecimal.ZERO,BigDecimal::add);
-		
-		txtTotalProduto.setValue(valorOrcto);
-		
-	}
-	
+
 	// @Override
 	public void load() {
 		this.acao = Constantes.ACAO_CONSULTAR;
@@ -957,11 +1010,13 @@ public class FrmCompra extends Formulario {
 		List<Markup> markup = markupRepository.findAll();
 		cboMarkup.setItens(markup, "sigla");
 
+		this.paramOrcto = carregaParam();
+
 	}
 
 	private void loadItens() {
 		List<ItemCompra> lista = new ArrayList<ItemCompra>();
-		
+
 		try {
 			if (compra != null && this.acao.equals(Constantes.ACAO_CONSULTAR)) {
 				lista = compraRepository.listaItens(compra.getId());
@@ -969,8 +1024,10 @@ public class FrmCompra extends Formulario {
 				tabela.setValue(lista);
 			}
 			calculaValorTotalOrcto();
-			calculaValorTotalDesconto();
-			calculaValorTotalProduto();
+			calculaQuantidadeItens();
+			calculaTotalItens();
+			// calculaValorTotalDesconto();
+			// calculaValorTotalProduto();
 		} catch (Exception e) {
 			e.printStackTrace();
 			SSMensagem.erro(e.getMessage());
@@ -991,7 +1048,7 @@ public class FrmCompra extends Formulario {
 
 		return retorno;
 	}
-	
+
 	private void aprovarOrcto() {
 		if (SSMensagem.confirma("Confirma Aprovação do Orçamento?")) {
 			Pessoa pessoa = null;
@@ -999,7 +1056,7 @@ public class FrmCompra extends Formulario {
 			if (!txtIdPessoa.getText().isEmpty()) {
 				pessoa = pessoaRepository.findOne(Integer.parseInt(txtIdPessoa.getText()));
 			}
-			if (pessoa == null ){
+			if (pessoa == null) {
 				pessoa = showPessoa();
 			}
 			if (pessoa != null) {
@@ -1010,14 +1067,14 @@ public class FrmCompra extends Formulario {
 			}
 		}
 	}
-	
+
 	private void reprovarOrcto() {
 		if (SSMensagem.confirma("Confirma Reprovação do Orçamento?")) {
 			cboStatus.setValue(StatusOrcamento.R);
 			salvar();
 		}
-	}	
-	
+	}
+
 	public void checaStatus() {
 		StatusOrcamento status = (StatusOrcamento) cboStatus.getValue();
 		if (status == StatusOrcamento.R || status == StatusOrcamento.A) {
@@ -1026,12 +1083,12 @@ public class FrmCompra extends Formulario {
 			habilitaBotoes(true);
 		}
 	}
-	
+
 	public void habilitaBotoes(boolean status) {
 		cmdAprovado.setEnabled(status);
 		cmdReprovado.setEnabled(status);
 		cmdSalvar.setEnabled(status);
-		//cmdSair.setEnabled(status);
+		// cmdSair.setEnabled(status);
 		btnPessoas.setEnabled(status);
 		chkNovo.setEnabled(status);
 		cmdIncluir.setEnabled(status);
@@ -1039,20 +1096,33 @@ public class FrmCompra extends Formulario {
 		cmdExcluir.setEnabled(status);
 		chkNovoItem.setEnabled(!status);
 		cmdSalvarItem.setEnabled(!status);
-		
+
 	}
-	
+
 	private Pessoa showPessoa() {
 		Formulario frm = SpringDesktopApp.getBean(frmConsulta);
 		this.dialogo(frm);
-		((FrmPessoas)frm).setNome(txtNome.getText());
-		Pessoa pessoa = ((FrmPessoas)frm).getPessoaSelecionada();
+		((FrmPessoas) frm).setNome(txtNome.getText());
+		Pessoa pessoa = ((FrmPessoas) frm).getPessoaSelecionada();
 		if (pessoa != null) {
 			txtIdPessoa.setText(pessoa.getId().toString());
 			txtNome.setText(pessoa.getNome());
 			txtTelefone.setText(pessoa.getTelefone());
 		}
 		return pessoa;
+	}
+
+	private ParamOrcto carregaParam() {
+		ParamOrcto param = (ParamOrcto) paramOrctoRepository.findOne(1);
+		if (param == null) {
+			param = new ParamOrcto();
+			param.setId(1);
+			param.setDoacao(new BigDecimal("10.0"));
+			param.setTroca(new BigDecimal("50.0"));
+			paramOrctoRepository.save(param);
+		}
+
+		return param;
 	}
 
 }
