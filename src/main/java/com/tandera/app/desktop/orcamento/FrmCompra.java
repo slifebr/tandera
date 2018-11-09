@@ -944,23 +944,7 @@ public class FrmCompra extends Formulario {
 		BigDecimal valorOrcto = compra.getItemCompra().stream().map(item -> item.getValorTotal())
 				.reduce(BigDecimal.ZERO, BigDecimal::add);
 
-		/*
-		 * BigDecimal valorOrcto = BigDecimal.ZERO;
-		 * 
-		 * for (ItemCompra item : compra.getItemCompra()){
-		 * System.out.println(item.getItem() + " - " + item.getValorTotal()); valorOrcto
-		 * = valorOrcto.add(item.getValorTotal()); System.out.println("Valor orcamento!"
-		 * + valorOrcto); };
-		 */
 
-		/*
-		 * BigDecimal desconto = new
-		 * BigDecimal(Biblioteca.converteValor(txtDeposito.getText())) .add(new
-		 * BigDecimal(Biblioteca.converteValor(txtDoacao.getText()))) .add(new
-		 * BigDecimal(Biblioteca.converteValor(txtTroca.getText())));
-		 * 
-		 * valorOrcto = valorOrcto.subtract(desconto);
-		 */
 		txtTotalOrcto.setText(valorOrcto.toString());
 		txtDeposito.setText(txtTotalOrcto.getText());
 
@@ -978,7 +962,7 @@ public class FrmCompra extends Formulario {
 	
 	private void calculaTotalItens() {
 
-		if (Biblioteca.temValorValido(txtTotalReprovados, "I") && 
+		if (Biblioteca.temValorValido(txtTotalReprovados, "I") &&
 			Biblioteca.temValorValido(txtTotalItensOrcam, "N")) {
 			
 			int reprovados =  Integer.parseInt(txtTotalReprovados.getText());
