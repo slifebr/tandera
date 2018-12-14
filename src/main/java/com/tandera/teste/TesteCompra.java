@@ -1,9 +1,7 @@
 package com.tandera.teste;
 
-import org.springframework.context.support.AbstractApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-
-import com.tandera.core.model.orcamento.Compra;
+import java.io.Console;
+import java.math.BigDecimal;
 
 public class TesteCompra {
 
@@ -11,9 +9,14 @@ public class TesteCompra {
 		//AbstractApplicationContext context = new Configc("springconfig.xml");
        // EmployeeRepository repository = context.getBean(EmployeeRepository.class);
  		
-		Compra compra = new Compra();
+      BigDecimal vl = new BigDecimal("92.9800004");
+      System.out.println(vl.ROUND_HALF_UP);
+      BigDecimal vl2 =vl.setScale(2,BigDecimal.ROUND_HALF_UP);
+      System.out.println(vl2);
+      System.out.println(vl);
 
-
+      System.out.println(String.format("%012.3f", 89.994589));   
+      
 	}
 
 }

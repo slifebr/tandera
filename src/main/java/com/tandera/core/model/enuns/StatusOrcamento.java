@@ -3,7 +3,9 @@ package com.tandera.core.model.enuns;
 public enum StatusOrcamento {
 	
 	N("Negociação"),
-	A("Aprovado"),
+	A("Aprovado Deposito"),
+	AD("Aprovado Doação"),
+	AT("Aprovado Troca"),
 	R("Reprovado");
 	
 	private String descricao;

@@ -10,17 +10,20 @@ import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.math.RoundingMode;
+import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BinaryOperator;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
@@ -32,14 +35,17 @@ import org.springframework.stereotype.Component;
 
 import com.tandera.app.desktop.cadastro.FrmPessoas;
 import com.tandera.app.spring.SpringDesktopApp;
+import com.tandera.core.dao.springjpa.CompraLogRepository;
 import com.tandera.core.dao.springjpa.CompraRepository;
 import com.tandera.core.dao.springjpa.EstadoRepository;
+import com.tandera.core.dao.springjpa.LiberacaoUsuarioRepository;
 import com.tandera.core.dao.springjpa.MarcaRepository;
 import com.tandera.core.dao.springjpa.MarkupRepository;
 import com.tandera.core.dao.springjpa.MascaraPrecoRepository;
 import com.tandera.core.dao.springjpa.ParamOrctoRepository;
 import com.tandera.core.dao.springjpa.PessoaRepository;
 import com.tandera.core.dao.springjpa.TamanhoRepository;
+import com.tandera.core.model.cadastro.LiberacaoUsuario;
 import com.tandera.core.model.cadastro.Pessoa;
 import com.tandera.core.model.comercial.Categoria;
 import com.tandera.core.model.comercial.Estado;
@@ -50,6 +56,7 @@ import com.tandera.core.model.comercial.Tamanho;
 import com.tandera.core.model.enuns.SimNao;
 import com.tandera.core.model.enuns.StatusOrcamento;
 import com.tandera.core.model.orcamento.Compra;
+import com.tandera.core.model.orcamento.CompraLog;
 import com.tandera.core.model.orcamento.ItemCompra;
 import com.tandera.core.model.orcamento.ParamOrcto;
 import com.tandera.core.services.CategoriaService;
@@ -76,6 +83,11 @@ public class FrmCompra extends Formulario {
 
 	@Autowired
 	private CompraRepository compraRepository;
+
+	@Autowired
+	private CompraLogRepository logRepository;
+
+	private LiberacaoUsuarioRepository liberacaoUsuarioRepository;
 
 	Class frmConsulta = FrmPessoas.class;
 
@@ -138,8 +150,11 @@ public class FrmCompra extends Formulario {
 	private final JPanel panelToolBar1 = new JPanel();
 
 	// botoes
-	private SSBotao cmdAprovado = new SSBotao();
+	private SSBotao cmdAprovadoDeposito = new SSBotao();
+	private SSBotao cmdAprovadoDoacao = new SSBotao();
+	private SSBotao cmdAprovadoTroca = new SSBotao();
 	private SSBotao cmdReprovado = new SSBotao();
+	private SSBotao cmdEstorno = new SSBotao();
 	private SSBotao cmdSalvar = new SSBotao();
 	private SSBotao cmdSair = new SSBotao();
 	private JCheckBox chkNovo = new JCheckBox("Novo?");
@@ -162,7 +177,7 @@ public class FrmCompra extends Formulario {
 	public FrmCompra(CategoriaService categoriaService, TamanhoRepository tamanhoRepository,
 			MarcaRepository marcaRepository, EstadoRepository estadoRepository,
 			MascaraPrecoRepository mascaraPrecoRepository, MarkupRepository markupRepository,
-			ParamOrctoRepository paramOrctoRepository) {
+			ParamOrctoRepository paramOrctoRepository, LiberacaoUsuarioRepository liberacaoUsuarioRepository) {
 
 		this.categoriaService = categoriaService;
 		this.tamanhoRepository = tamanhoRepository;
@@ -171,6 +186,7 @@ public class FrmCompra extends Formulario {
 		this.mascaraPrecoRepository = mascaraPrecoRepository;
 		this.markupRepository = markupRepository;
 		this.paramOrctoRepository = paramOrctoRepository;
+		this.liberacaoUsuarioRepository = liberacaoUsuarioRepository;
 
 		getConteudo().setBackground(SystemColor.control);
 		getConteudo().setLayout(null);
@@ -195,8 +211,11 @@ public class FrmCompra extends Formulario {
 	private void init() {
 		super.setTitulo("Orçamento");
 		super.setDescricao("Lançamentos de Orçamentos");
-		super.getRodape().add(cmdAprovado);
+		super.getRodape().add(cmdAprovadoDeposito);
+		super.getRodape().add(cmdAprovadoDoacao);
+		super.getRodape().add(cmdAprovadoTroca);
 		super.getRodape().add(cmdReprovado);
+		super.getRodape().add(cmdEstorno);
 		super.getRodape().add(chkNovo);
 		super.getRodape().add(cmdSalvar);
 		super.getRodape().add(cmdSair);
@@ -243,6 +262,7 @@ public class FrmCompra extends Formulario {
 		cboConsignado.setBounds(380, 5, 94, 50);
 		cboConsignado.setRotulo("Consignado");
 		cboConsignado.setItens(SimNao.values());
+		cboConsignado.setValue(SimNao.valueOf("N"));
 		panelCampos.add(cboConsignado);
 
 		cboStatus.setBounds(656, 5, 205, 50);
@@ -308,8 +328,16 @@ public class FrmCompra extends Formulario {
 
 		cmdSair.setText("Fechar");
 		cmdSalvar.setText("Salvar");
-		cmdAprovado.setText("Aprovar");
+		cmdAprovadoDeposito.setText("Deposito");
+		cmdAprovadoDeposito.setToolTipText("Aprovar deposito");
+		cmdAprovadoDoacao.setText("Doação");
+		cmdAprovadoDoacao.setToolTipText("Aprovar Doação");
+		cmdAprovadoTroca.setText("Troca");
+		cmdAprovadoTroca.setToolTipText("Aprovar Troca");
 		cmdReprovado.setText("Reprovar");
+		cmdReprovado.setToolTipText("Reprovar Orçamento");
+		cmdEstorno.setText("Estornar");
+		cmdEstorno.setToolTipText("Retornar status para Negociação");
 		cmdSalvarItem.setText("Salvar");
 		panelToolBar1.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 5));
 
@@ -481,10 +509,23 @@ public class FrmCompra extends Formulario {
 				calculaValorTotalInclusao();
 			}
 		});
-		cmdAprovado.addActionListener(new ActionListener() {
+		cmdAprovadoDeposito.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				aprovarOrcto();
+				aprovarOrctoDeposito();
+			}
+		});
+		cmdAprovadoDoacao.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				aprovarOrctoDoacao();
+			}
+		});
+
+		cmdAprovadoTroca.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				aprovarOrctoTroca();
 			}
 		});
 		cmdReprovado.addActionListener(new ActionListener() {
@@ -493,6 +534,14 @@ public class FrmCompra extends Formulario {
 				reprovarOrcto();
 			}
 		});
+
+		cmdEstorno.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				estornarOrcto();
+			}
+		});
+
 		cmdSalvarItem.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -710,11 +759,19 @@ public class FrmCompra extends Formulario {
 				compra.setData(txtData.getDataHora());
 
 				if (cboStatus.getText().isEmpty()) {
-
 					cboStatus.setValue(StatusOrcamento.N);
 				}
 
+				if (cboConsignado.getText().isEmpty()) {
+					cboConsignado.setValue(SimNao.N);
+				}
+
+				if (txtTotalReprovados.getText().isEmpty()) {
+					txtTotalReprovados.setValue(0);
+				}
+
 				compra.setStatus((StatusOrcamento) cboStatus.getValue());
+				compra.setConsignado((SimNao) cboConsignado.getValue());
 				if (!txtIdPessoa.getText().isEmpty()) {
 					Pessoa pessoa = pessoaRepository.findById(Integer.parseInt(txtIdPessoa.getText()));
 					compra.setPessoa(pessoa);
@@ -724,11 +781,10 @@ public class FrmCompra extends Formulario {
 
 				compra.setTelefone(txtTelefone.getText());
 				compra.setObs(txtObs.getText());
-				compra.setVlDeposito(BigDecimal.valueOf(txtDeposito.getDouble()));
-				compra.setVlTroca(BigDecimal.valueOf(txtTroca.getDouble()));
-				compra.setVlDoacao(BigDecimal.valueOf(txtDoacao.getDouble()));
+				compra.setVlDeposito(Biblioteca.formataBigDecimal(txtDeposito.getText(), 2));
+				compra.setVlTroca(new BigDecimal(txtTroca.getText()).setScale(2, BigDecimal.ROUND_HALF_UP));
+				compra.setVlDoacao(new BigDecimal(txtDoacao.getText()).setScale(2, BigDecimal.ROUND_HALF_UP));
 				compra.setReprovado(txtTotalReprovados.getInteger());
-				compra.setConsignado((SimNao) cboConsignado.getValue());
 
 				if (compra.getData() == null || compra.getStatus() == null || compra.getNome() == null
 						|| compra.getNome().isEmpty() || compra.getTelefone() == null
@@ -868,10 +924,10 @@ public class FrmCompra extends Formulario {
 			this.compra.setItemCompra(listaDeItens);
 			tabela.setValue(listaDeItens);
 		}
-
 		// limpar campos de adicao/alteração de itens
 		limparPainelInclusao();
-		loadItens();
+		calculaValorTotalOrcto();
+		//loadItens();
 
 		if (!chkNovoItem.isSelected()) {
 			panel_inclusao.setVisible(false);
@@ -883,16 +939,10 @@ public class FrmCompra extends Formulario {
 	private List<ItemCompra> numeraItens(List<ItemCompra> lista) {
 		List<ItemCompra> listaRetorno = new ArrayList<ItemCompra>();
 		AtomicInteger contador = new AtomicInteger(1);
-
-		// lista.forEach( System.out::println );
-
 		lista.forEach(item -> {
 			item.setItem(contador.getAndIncrement());
-			// System.out.println(contador);
-			// System.out.println(item);
 			listaRetorno.add(item);
 		});
-
 		return listaRetorno;
 	}
 
@@ -917,20 +967,21 @@ public class FrmCompra extends Formulario {
 		txtDeposito.setText(null);
 		txtDoacao.setText(null);
 		txtTroca.setText(null);
-		txtTotalReprovados.setText(null);
 		txtNome.setText(null);
 		txtTelefone.setText(null);
 		txtTotalOrcto.setText(null);
 		cboConsignado.setText(null);
 		cboStatus.setText(null);
+		txtTotalReprovados.setText(null);
+		txtTotalItensOrcam.setText(null);
+		txtTotalProdutos.setText(null);
 	}
 
 	private void calculaValorTotalInclusao() {
 		if (Biblioteca.temValorValido(txtQtde, "I") && Biblioteca.temValorValido(txtValor, "N")) {
 			int qtd = Integer.parseInt(txtQtde.getText());
-
-			BigDecimal valorUnitario = txtValor.getBigDecimal();
-			BigDecimal resultado = valorUnitario.multiply(new BigDecimal(qtd));
+			BigDecimal valorUnitario = txtValor.getBigDecimal().setScale(2, BigDecimal.ROUND_HALF_UP);
+			BigDecimal resultado = valorUnitario.multiply(new BigDecimal(qtd)).setScale(2, BigDecimal.ROUND_HALF_UP);
 			txtValorTotalItem.setNumero(resultado);
 		}
 	}
@@ -940,38 +991,41 @@ public class FrmCompra extends Formulario {
 		txtTotalItensOrcam.setText(qtde.toString());
 	}
 
+	private void carregaValorTotalOrcto() {
+		txtTotalOrcto.setText(compra.getVlDeposito().toString());
+		txtDeposito.setText(compra.getVlDeposito().toString());
+		txtTroca.setText(compra.getVlTroca().toString());
+		txtDoacao.setText(compra.getVlDoacao().toString());
+	}
+
 	private void calculaValorTotalOrcto() {
-		BigDecimal valorOrcto = compra.getItemCompra().stream().map(item -> item.getValorTotal())
-				.reduce(BigDecimal.ZERO, BigDecimal::add);
+		BigDecimal valorOrcto = compra.getItemCompra()
+				                      .stream()
+				                      .map(item -> item.getValorTotal())
+				                      .reduce(BigDecimal.ZERO, BigDecimal::add).setScale(2, BigDecimal.ROUND_HALF_UP);
+	//	txtTotalOrcto.setText(valorOrcto.setScale(2, BigDecimal.ROUND_HALF_UP).toString());
+		compra.setVlDeposito(valorOrcto.setScale(2, BigDecimal.ROUND_HALF_UP));
+	// txtDeposito.setText(new BigDecimal(txtTotalOrcto.getText()).setScale(2, BigDecimal.ROUND_HALF_UP).toString());
+		BigDecimal fatorTroca = paramOrcto.getTroca().divide(new BigDecimal("100")).add(new BigDecimal("1")).setScale(2,
+				BigDecimal.ROUND_HALF_UP);
+		//txtTroca.setText(valorOrcto.multiply(fatorTroca).setScale(2, BigDecimal.ROUND_HALF_UP).toString());
+		compra.setVlTroca(valorOrcto.multiply(fatorTroca).setScale(2, BigDecimal.ROUND_HALF_UP));
+		BigDecimal fatorDoacao = paramOrcto.getDoacao().divide(new BigDecimal("100")).add(new BigDecimal("1"))
+				.setScale(2, BigDecimal.ROUND_HALF_UP);
 
-
-		txtTotalOrcto.setText(valorOrcto.toString());
-		txtDeposito.setText(txtTotalOrcto.getText());
-
-		BigDecimal fatorTroca = paramOrcto.getTroca().divide(new BigDecimal("100")).add(new BigDecimal("1"));
-
-		// System.out.println("fator troca: " + fatorTroca);
-		txtTroca.setText(valorOrcto.multiply(fatorTroca).setScale(2, RoundingMode.HALF_EVEN).toString());
-
-		BigDecimal fatorDoacao = paramOrcto.getDoacao().divide(new BigDecimal("100")).add(new BigDecimal("1"));
-
-		// System.out.println("fator Doacao: " + fatorDoacao);
-		txtDoacao.setText(valorOrcto.multiply(fatorDoacao).setScale(2, RoundingMode.HALF_EVEN).toString());
+		//		txtDoacao.setText(valorOrcto.multiply(fatorDoacao).setScale(2, BigDecimal.ROUND_HALF_UP).toString());
+		compra.setVlDoacao(valorOrcto.multiply(fatorDoacao).setScale(2, BigDecimal.ROUND_HALF_UP));
+		carregaValorTotalOrcto();
 
 	}
-	
+
 	private void calculaTotalItens() {
-
-		if (Biblioteca.temValorValido(txtTotalReprovados, "I") &&
-			Biblioteca.temValorValido(txtTotalItensOrcam, "N")) {
-			
-			int reprovados =  Integer.parseInt(txtTotalReprovados.getText());
+		if (Biblioteca.temValorValido(txtTotalReprovados, "I") && Biblioteca.temValorValido(txtTotalItensOrcam, "N")) {
+			int reprovados = Integer.parseInt(txtTotalReprovados.getText());
 			Integer qtdeTotal = Integer.parseInt(txtTotalItensOrcam.getText());
-			Integer resultado = qtdeTotal +reprovados;
+			Integer resultado = qtdeTotal + reprovados;
 			txtTotalProdutos.setValue(resultado);
-			
 		}
-
 	}
 
 	// @Override
@@ -1007,7 +1061,8 @@ public class FrmCompra extends Formulario {
 				vcContadorDeItens = lista.size();
 				tabela.setValue(lista);
 			}
-			calculaValorTotalOrcto();
+			//calculaValorTotalOrcto();
+			carregaValorTotalOrcto();
 			calculaQuantidadeItens();
 			calculaTotalItens();
 			// calculaValorTotalDesconto();
@@ -1033,35 +1088,151 @@ public class FrmCompra extends Formulario {
 		return retorno;
 	}
 
-	private void aprovarOrcto() {
-		if (SSMensagem.confirma("Confirma Aprovação do Orçamento?")) {
-			Pessoa pessoa = null;
-//			System.out.println("1");
-			if (!txtIdPessoa.getText().isEmpty()) {
-				pessoa = pessoaRepository.findOne(Integer.parseInt(txtIdPessoa.getText()));
-			}
-			if (pessoa == null) {
-				pessoa = showPessoa();
-			}
-			if (pessoa != null) {
-				cboStatus.setValue(StatusOrcamento.A);
-				salvar();
+	private void aprovarOrctoDeposito() {
+		if (SSMensagem.confirma("Confirma Aprovação para Depósito do Orçamento?")) {
+			if (validaAprovacao()) {
+				String historico = "Aprovação: (Status: " + StatusOrcamento.A.toString() + " - Valor Aprovado: "
+						+ NumberFormat.getCurrencyInstance().format(compra.getVlAprovado()) + ")";
+				LiberacaoUsuario liberacaoUsuario = autorizacao(historico);
+
+				if (liberacaoUsuario != null) {
+					cboStatus.setValue(StatusOrcamento.A);
+					compra.setVlAprovado(compra.getVlDeposito());
+					salvar();
+					gravarLogCompras(liberacaoUsuario, historico);
+				} else {
+					SSMensagem.informa("Senha Inválida!");
+				}
+
 			} else {
 				SSMensagem.informa("Falta cadastrar Pessoa!");
 			}
 		}
 	}
 
+	private void aprovarOrctoDoacao() {
+		if (SSMensagem.confirma("Confirma Aprovação de Doação do Orçamento?")) {
+			if (validaAprovacao()) {
+				String historico = "Aprovação: (Status: " + StatusOrcamento.AD.toString() + " - Valor Aprovado: "
+						+  String.format("%12.2f",compra.getVlAprovado()) + ")";
+				LiberacaoUsuario liberacaoUsuario = autorizacao(historico);
+
+				if (liberacaoUsuario != null) {
+					cboStatus.setValue(StatusOrcamento.AD);
+					compra.setVlAprovado(compra.getVlDoacao());
+					salvar();
+					gravarLogCompras(liberacaoUsuario, historico);
+				} else {
+					SSMensagem.informa("Senha Inválida!");
+				}
+
+			} else {
+				SSMensagem.informa("Falta cadastrar Pessoa!");
+			}
+		}
+	}
+
+	private void aprovarOrctoTroca() {
+		if (SSMensagem.confirma("Confirma Aprovação de Troca do Orçamento?")) {
+			if (validaAprovacao()) {
+				String historico = "Aprovação: (Status: " + StatusOrcamento.AT.toString() + " - Valor Aprovado: "
+						+  String.format("%12.2f",compra.getVlAprovado()) + ")";
+				LiberacaoUsuario liberacaoUsuario = autorizacao(historico);
+
+				if (liberacaoUsuario != null) {
+					cboStatus.setValue(StatusOrcamento.AT);
+					compra.setVlAprovado(compra.getVlTroca());
+					salvar();
+					gravarLogCompras(liberacaoUsuario, historico);
+				} else {
+					SSMensagem.informa("Senha Inválida!");
+				}
+
+			} else {
+				SSMensagem.informa("Falta cadastrar Pessoa!");
+			}
+		}
+	}
+
+	private boolean validaAprovacao() {
+		Pessoa pessoa = null;
+		if (!txtIdPessoa.getText().isEmpty()) {
+			pessoa = pessoaRepository.findOne(Integer.parseInt(txtIdPessoa.getText()));
+		}
+		if (pessoa == null) {
+			pessoa = showPessoa();
+		}
+		return (pessoa != null);
+	}
+
 	private void reprovarOrcto() {
 		if (SSMensagem.confirma("Confirma Reprovação do Orçamento?")) {
-			cboStatus.setValue(StatusOrcamento.R);
-			salvar();
+
+			String historico = "Reprovação: (Status: " + compra.getStatus().toString() + " - Valor Aprovado: "
+					+  String.format("%12.2f",compra.getVlAprovado()) + ")";
+
+			LiberacaoUsuario liberacaoUsuario = autorizacao(historico);
+
+			if (liberacaoUsuario != null) {
+
+				cboStatus.setValue(StatusOrcamento.R);
+				salvar();
+
+				gravarLogCompras(liberacaoUsuario, historico);
+			}
+
 		}
+
+	}
+
+	private void estornarOrcto() {
+		if (SSMensagem.confirma("Confirma Estorno do Orçamento?")) {
+			String historico = "Estorno: (Status: " + 
+		                       compra.getStatus().toString() + 
+		                       "Valor Aprovado: " + 
+		                       String.format("%12.2f", compra.getVlAprovado()) + ")";
+			LiberacaoUsuario liberacaoUsuario = autorizacao(historico);
+			if (liberacaoUsuario != null) {
+				cboStatus.setValue(StatusOrcamento.N);
+				salvar();
+				gravarLogCompras(liberacaoUsuario, historico);
+			}
+		}
+	}
+
+	private LiberacaoUsuario autorizacao(String historico) {
+
+		LiberacaoUsuario liberacaoUsuario = new LiberacaoUsuario();
+
+		String chave;
+		JPasswordField password = new JPasswordField(10);
+		password.setEchoChar('*');
+		// Mostra o rótulo e a caixa de entrada de password para o usuario fornecer a
+		// senha:
+		JOptionPane.showMessageDialog(null, password, "Informe chave de liberação", JOptionPane.PLAIN_MESSAGE);
+		chave = new String(password.getPassword());
+		if (!chave.isEmpty()) {
+			liberacaoUsuario = liberacaoUsuarioRepository.findByChaveIgnoreCase(chave);
+
+		}
+
+		return liberacaoUsuario;
+
+	}
+
+	private void gravarLogCompras(LiberacaoUsuario libera, String historico) {
+		CompraLog log = new CompraLog();
+		log.setCompra(compra);
+		log.setLiberacaoUsuario(libera);
+		log.setData(Calendar.getInstance());
+		log.setHistorico(historico);
+		logRepository.save(log);
 	}
 
 	public void checaStatus() {
 		StatusOrcamento status = (StatusOrcamento) cboStatus.getValue();
-		if (status == StatusOrcamento.R || status == StatusOrcamento.A) {
+		if (status == StatusOrcamento.R || status == StatusOrcamento.A || status == StatusOrcamento.AD
+				|| status == StatusOrcamento.AT) {
 			habilitaBotoes(false);
 		} else {
 			habilitaBotoes(true);
@@ -1069,8 +1240,12 @@ public class FrmCompra extends Formulario {
 	}
 
 	public void habilitaBotoes(boolean status) {
-		cmdAprovado.setEnabled(status);
+		cmdAprovadoDeposito.setEnabled(status);
+		cmdAprovadoDoacao.setEnabled(status);
+		cmdAprovadoTroca.setEnabled(status);
 		cmdReprovado.setEnabled(status);
+		cmdEstorno.setEnabled(!status);
+
 		cmdSalvar.setEnabled(status);
 		// cmdSair.setEnabled(status);
 		btnPessoas.setEnabled(status);

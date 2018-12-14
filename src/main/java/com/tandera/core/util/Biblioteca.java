@@ -2,9 +2,6 @@ package com.tandera.core.util;
 
 import java.math.BigDecimal;
 
-import javax.swing.JComboBox;
-import javax.swing.JTextField;
-
 import edu.porgamdor.util.desktop.ss.SSCaixaCombinacao;
 import edu.porgamdor.util.desktop.ss.SSCampoNumero;
 import edu.porgamdor.util.desktop.ss.SSCampoTexto;
@@ -86,4 +83,16 @@ public  class Biblioteca {
 		
 		return retorno;
 	}
+	
+	public static BigDecimal formataBigDecimal(BigDecimal valor, int scala) {
+		
+		BigDecimal retorno = new BigDecimal((valor.setScale(scala,BigDecimal.ROUND_HALF_UP)).toString());
+		return retorno;
+	}
+	
+	public static BigDecimal formataBigDecimal(String valor, int scala) {
+		
+		BigDecimal retorno = new BigDecimal( new BigDecimal(valor).setScale(scala,BigDecimal.ROUND_HALF_UP).toString());
+		return retorno;
+	}	
 }

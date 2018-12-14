@@ -93,6 +93,10 @@ public class Compra implements Serializable {
 	@Enumerated(EnumType.STRING)
 	private SimNao consignado;
 	
+	@NotNull
+	@Column(name = "vl_aprovado")
+	private BigDecimal vlAprovado = BigDecimal.ZERO;
+	
 	
 
 	public Integer getId() {
@@ -198,6 +202,14 @@ public class Compra implements Serializable {
 	public void setReprovado(Integer reprovado) {
 		this.reprovado = reprovado;
 	}
+	
+	public BigDecimal getVlAprovado() {
+		return vlAprovado;
+	}
+	
+	public void setVlAprovado(BigDecimal vlAprovado) {
+		this.vlAprovado = vlAprovado;
+	}
 
 	@Override
 	public int hashCode() {
@@ -228,8 +240,10 @@ public class Compra implements Serializable {
 	public String toString() {
 		return "Compra [id=" + id + ", data=" + data + ", status=" + status + ", pessoa=" + pessoa + ", nome=" + nome
 				+ ", telefone=" + telefone + ", obs=" + obs + ", vlDeposito=" + vlDeposito + ", vlTroca=" + vlTroca
-				+ ", vlDoacao=" + vlDoacao + ", Reprovado=" + reprovado + ", itemCompra=" + itemCompra + ", consignado="
-				+ consignado + "]";
+				+ ", vlDoacao=" + vlDoacao + ", reprovado=" + reprovado + ", itemCompra=" + itemCompra + ", consignado="
+				+ consignado + ", vlAprovado=" + vlAprovado + "]";
 	}
+
+	
 
 }
