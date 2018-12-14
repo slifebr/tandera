@@ -29,7 +29,7 @@ import edu.porgamdor.util.desktop.ambiente.Ambiente;
 //NOVA CONFIGURAÇÃO
 @PropertySource(value = { "file:/tandera/config/ambiente.properties" })
 
-@ComponentScan(value = "com.tandera.core.dao*")
+@ComponentScan(value = {"com.tandera.core.dao*","com.tandera.core.services*"})
 @EnableJpaRepositories(basePackages="com.tandera.core.dao.springjpa")
 public class PersistenceConfig {
 	private static final String PERSISTENCE_UNIT = "PU_CFIP";

@@ -1,16 +1,19 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.tandera</groupId>
 	<artifactId>tandera</artifactId>
 	<version>1.0</version>
+	<packaging>jar</packaging>
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
-		
+
 		<springframework.version>4.3.0.RELEASE</springframework.version>
-		<hibernate.version>4.3.6.Final</hibernate.version>
+		<hibernate.version>5.3.1.Final</hibernate.version>
 		<hsqldb.version>2.3.2</hsqldb.version>
 		<postgre.version>42.2.2</postgre.version>
 	</properties>
@@ -18,7 +21,7 @@
 		<dependency>
 			<groupId>com.slifesys</groupId>
 			<artifactId>desktop-util</artifactId>
-			<version>1.0</version>
+			<version>1.0.0</version>
 		</dependency>
 		<!-- Spring -->
 		<dependency>
@@ -65,14 +68,14 @@
 			<artifactId>hibernate-entitymanager</artifactId>
 			<version>${hibernate.version}</version>
 		</dependency>
-		
+
 		<!--hibernate-validator -->
 		<dependency>
-		    <groupId>org.hibernate</groupId>
-		    <artifactId>hibernate-validator</artifactId>
-		    <version>5.1.2.Final</version>
-		</dependency>		
-		
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-validator</artifactId>
+			<version>${hibernate.version}</version>
+		</dependency>
+
 		<!-- Banco de dados -->
 		<dependency>
 			<groupId>org.hsqldb</groupId>
@@ -86,7 +89,7 @@
 			<artifactId>postgresql</artifactId>
 			<version>${postgre.version}</version>
 		</dependency>
-		
+
 		<!-- LOG -->
 		<dependency>
 			<groupId>log4j</groupId>
@@ -94,16 +97,62 @@
 			<version>1.2.17</version>
 		</dependency>
 	</dependencies>
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.7.0</version>
-        <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build> 	
+
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.7.0</version>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+
+			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-dependency-plugin</artifactId> 
+				<executions> <execution> <id>copy-dependencies</id> <phase>prepare-package</phase> 
+				<goals> <goal>copy-dependencies</goal> </goals> <configuration> <outputDirectory> 
+				${project.build.directory}/libs </outputDirectory> </configuration> </execution> 
+				</executions> </plugin> <plugin> <groupId>org.apache.maven.plugins</groupId> 
+				<artifactId>maven-jar-plugin</artifactId> <configuration> <archive> <manifest> 
+				<addClasspath>true</addClasspath> <classpathPrefix>libs/</classpathPrefix> 
+				<mainClass> com.tandera.app.spring.SpringDesktopApp </mainClass> </manifest> 
+				</archive> </configuration> </plugin> -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<archive>
+								<manifest>
+									<mainClass>
+										com.tandera.app.spring.SpringDesktopApp
+									</mainClass>
+								</manifest>
+							</archive>
+							<descriptorRefs>
+								<descriptorRef>jar-with-dependencies</descriptorRef>
+							</descriptorRefs>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+		</plugins>
+	</build>
+
+	<repositories>
+		<repository>
+			<id>localrepository</id>
+			<url>file://c:\maven\repo</url>
+		</repository>
+	</repositories>
+
+
 </project>

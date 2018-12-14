@@ -1,4 +1,4 @@
-package com.tandera.app.desktop.cadastro;
+package com.tandera.app.desktop.comercial;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -19,8 +19,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.tandera.app.spring.SpringDesktopApp;
-import com.tandera.core.dao.springjpa.PessoaRepository;
-import com.tandera.core.model.cadastro.Pessoa;
+import com.tandera.core.dao.springjpa.CategoriaRepository;
+import com.tandera.core.model.comercial.Categoria;
 
 import edu.porgamdor.util.desktop.Formulario;
 import edu.porgamdor.util.desktop.FormularioConsulta;
@@ -32,17 +32,12 @@ import edu.porgamdor.util.desktop.ss.util.Validacao;
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class FrmPessoas extends FormularioConsulta {
-	
+public class FrmCategorias extends FormularioConsulta {
+
 	@Autowired
-	PessoaRepository dao;
-	
-	private String nome; // utilizado pela chamada de formularios de consulta,  podendo ser utulizado para inclusão
-	private Pessoa pessoaSelecionada;
+	CategoriaRepository dao;
 
-	
-
-	Class formInclusao = FrmPessoa.class;
+	Class formInclusao = FrmCategoria.class;
 
 	// JA PODERIA VIR DE FormularioConsulta
 	private JPanel filtro = new JPanel();
@@ -52,16 +47,14 @@ public class FrmPessoas extends FormularioConsulta {
 	private SSCampoTexto txtFiltro = new SSCampoTexto();
 	private SSBotao cmdBuscar = new SSBotao();
 
-	private SSBotao cmdSelecionar = new SSBotao();
 	private SSBotao cmdIncluir = new SSBotao();
 	private SSBotao cmdAlterar = new SSBotao();
 	private SSBotao cmdFechar = new SSBotao();
-	
-	
-	public FrmPessoas() {
+
+	public FrmCategorias() {
 		// JA PODERIA VIR DE FormularioConsulta
-		setTitulo("Consulta de Pessoas");
-		setDescricao("Listagem das Pessoas");
+		setTitulo("Consulta de Categorias");
+		setDescricao("Listagem dos Categorias");
 		setConteudoLayout(new BorderLayout());
 		setAlinhamentoRodape(FlowLayout.LEFT);
 		filtro.setLayout(new GridBagLayout());
@@ -74,8 +67,7 @@ public class FrmPessoas extends FormularioConsulta {
 	}
 
 	private void configurarCamposPesquisa() {
-		
-		txtFiltro.setRotulo("Nome");
+		txtFiltro.setRotulo("Descrição");
 		txtFiltro.setColunas(50);
 		cmdBuscar.setText("Buscar");
 
@@ -83,9 +75,6 @@ public class FrmPessoas extends FormularioConsulta {
 		cmdIncluir.setIcone("novo");
 		cmdAlterar.setText("Alterar");
 		cmdFechar.setText("Fechar");
-		cmdSelecionar.setText("Selecionar");
-		cmdSelecionar.setIcone("confirmar");
-		
 		txtFiltro.setColunas(30);
 	}
 
@@ -93,16 +82,13 @@ public class FrmPessoas extends FormularioConsulta {
 		// campos da tabela
 		// BASICAMENTE O QUE VC TERÁ QUE MUDAR ENTRE FORMULARIOS
 		tabela.getModeloTabela().addColumn("Id");
-		tabela.getModeloTabela().addColumn("Nome");
-		tabela.getModeloTabela().addColumn("CPF");
+		tabela.getModeloTabela().addColumn("Descrição");
 
 		tabela.getModeloColuna().getColumn(0).setPreferredWidth(30);
-		tabela.getModeloColuna().getColumn(1).setPreferredWidth(250);
-		tabela.getModeloColuna().getColumn(2).setPreferredWidth(120);
+		tabela.getModeloColuna().getColumn(1).setPreferredWidth(320);
 
 		tabela.getModeloColuna().setCampo(0, "id");
-		tabela.getModeloColuna().setCampo(1, "nome");
-		tabela.getModeloColuna().setCampo(2, "cpf");
+		tabela.getModeloColuna().setCampo(1, "descr");
 
 	}
 
@@ -135,7 +121,6 @@ public class FrmPessoas extends FormularioConsulta {
 		getConteudo().add(filtro, BorderLayout.NORTH);
 		getConteudo().add(scroll, BorderLayout.CENTER);
 
-		getRodape().add(cmdSelecionar);
 		getRodape().add(cmdIncluir);
 		getRodape().add(cmdAlterar);
 		getRodape().add(cmdFechar);
@@ -163,11 +148,6 @@ public class FrmPessoas extends FormularioConsulta {
 				alterar();
 			}
 		});
-		cmdSelecionar.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				selecionar();
-			}
-		});
 	}
 
 	public JPanel getFiltro() {
@@ -179,14 +159,14 @@ public class FrmPessoas extends FormularioConsulta {
 	}
 
 	private void listar() {
-		List<Pessoa> lista = new ArrayList<Pessoa>();
+		List<Categoria> lista = new ArrayList<Categoria>();
 		try {
-			String nome = txtFiltro.getText();
-			if (Validacao.vazio(nome)) {
+			String descr = txtFiltro.getText();
+			if (Validacao.vazio(descr)) {
 				lista = dao.findAll();
 
 			} else {
-				lista = dao.findByNomeContainingIgnoreCase(nome);
+				lista = dao.findByDescrContainingIgnoreCase(descr);
 			}
 			if (lista.size() == 0)
 				SSMensagem.avisa("Nenhum dado encontrado");
@@ -203,7 +183,7 @@ public class FrmPessoas extends FormularioConsulta {
 	}
 
 	private void alterar() {
-		Pessoa entidade = (Pessoa) tabela.getLinhaSelecionada();
+		Categoria entidade = (Categoria) tabela.getLinhaSelecionada();
 		if (entidade == null) {
 			SSMensagem.avisa("Selecione um item da lista");
 			return;
@@ -211,44 +191,10 @@ public class FrmPessoas extends FormularioConsulta {
 		exibirCadastro(entidade);
 	}
 
-	private void selecionar() {
-		setPessoaSelecionada( (Pessoa) tabela.getLinhaSelecionada());
-		if (pessoaSelecionada == null) {
-			SSMensagem.avisa("Selecione um item da lista");
-			return;
-		}
-		sair();
-	}	
-	
-	private void exibirCadastro(Pessoa entidade) {
+	private void exibirCadastro(Categoria entidade) {
 		Formulario frm = SpringDesktopApp.getBean(formInclusao);
 		frm.setEntidade(entidade);
-		if (!this.isDialogo(this) ) {
-			this.exibir(frm);
-		} else {
-			this.dialogo(frm);
-			txtFiltro.setText(((FrmPessoa) frm).getEntidade().getNome());
-			listar();
-			
-		}
+		this.exibir(frm);
 	}
-	
-	
-	public String getNome() {
-		return nome;
-	}
-
-	public void setNome(String nome) {
-		this.nome = nome;
-	}
-
-	public Pessoa getPessoaSelecionada() {
-		return pessoaSelecionada;
-	}
-
-	public void setPessoaSelecionada(Pessoa pessoaSelecionada) {
-		this.pessoaSelecionada = pessoaSelecionada;
-	}
-	
 
 }

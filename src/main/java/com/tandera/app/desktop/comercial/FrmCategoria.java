@@ -5,7 +5,6 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.math.BigDecimal;
 
 import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
@@ -15,38 +14,36 @@ import javax.swing.border.EtchedBorder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.tandera.core.dao.springjpa.MarkupRepository;
-import com.tandera.core.model.comercial.Markup;
+import com.tandera.core.dao.springjpa.CategoriaRepository;
+import com.tandera.core.model.comercial.Categoria;
+import com.tandera.core.model.comercial.Estado;
 
-import edu.porgamdor.util.desktop.Formato;
 import edu.porgamdor.util.desktop.Formulario;
 import edu.porgamdor.util.desktop.ss.SSBotao;
-import edu.porgamdor.util.desktop.ss.SSCampoNumero;
 import edu.porgamdor.util.desktop.ss.SSCampoTexto;
 import edu.porgamdor.util.desktop.ss.SSMensagem;
 
 @Component
-public class FrmMarkup extends Formulario {
-
+public class FrmCategoria extends Formulario {
+	
 	@Autowired
-	private MarkupRepository dao;
+	private CategoriaRepository dao;
 
-	private Markup entidade;
+	private Categoria entidade;
 
-	private SSCampoTexto txtSigla = new SSCampoTexto();
-	private SSCampoNumero txtValor = new SSCampoNumero();
+	private SSCampoTexto txtDescr = new SSCampoTexto();
 
 	private SSBotao cmdSalvar = new SSBotao();
 	private SSBotao cmdSair = new SSBotao();
 	private JCheckBox chkNovo = new JCheckBox("Novo?");
-
-	public FrmMarkup() {
+	
+	public FrmCategoria() {
 		init();
 	}
 
 	private void init() {
-		super.setTitulo("Markup");
-		super.setDescricao("Cadastro de Markup");
+		super.setTitulo("Categoria");
+		super.setDescricao("Cadastro de Categorias");
 		super.getRodape().add(chkNovo);
 		super.getRodape().add(cmdSalvar);
 		super.getRodape().add(cmdSair);
@@ -57,25 +54,16 @@ public class FrmMarkup extends Formulario {
 		GridBagLayout gbl_panelCampos = new GridBagLayout();
 		panelCampos.setLayout(gbl_panelCampos);
 
-		GridBagConstraints gbcTxtSigla = new GridBagConstraints();
-		gbcTxtSigla.weightx = 2.0;
-		gbcTxtSigla.insets = new Insets(5, 5, 5, 5);
-		gbcTxtSigla.fill = GridBagConstraints.HORIZONTAL;
-		gbcTxtSigla.gridx = 0;
-		gbcTxtSigla.gridy = 0;
-		panelCampos.add(txtSigla, gbcTxtSigla);
+		GridBagConstraints gbcTxtDescr = new GridBagConstraints();
+		gbcTxtDescr.weightx = 2.0;
+		gbcTxtDescr.insets = new Insets(5, 5, 5, 5);
+		gbcTxtDescr.fill = GridBagConstraints.HORIZONTAL;
+		gbcTxtDescr.gridx = 0;
+		gbcTxtDescr.gridy = 0;
+		panelCampos.add(txtDescr, gbcTxtDescr);
 
-		txtSigla.setColunas(10);
-		txtSigla.setRotulo("Sigla");
-
-		GridBagConstraints gbcTxtValor = new GridBagConstraints();
-		gbcTxtValor.insets = new Insets(5, 5, 0, 5);
-		gbcTxtValor.fill = GridBagConstraints.BOTH;
-		gbcTxtValor.gridx = 0;
-		gbcTxtValor.gridy = 1;
-		txtValor.setRotulo("Valor");
-		txtValor.setFormato(Formato.MOEDA);
-		panelCampos.add(txtValor, gbcTxtValor);
+		txtDescr.setColunas(10);
+		txtDescr.setRotulo("Descrição");
 
 		cmdSair.setText("Fechar");
 		cmdSalvar.setText("Salvar");
@@ -99,7 +87,7 @@ public class FrmMarkup extends Formulario {
 
 	// public void setEntidade(Natureza entidade) {
 	public void setEntidade(Object entidade) {
-		this.entidade = (Markup) entidade;
+		this.entidade = (Categoria) entidade;
 		if (entidade != null)
 			atribuir();
 		else
@@ -108,26 +96,23 @@ public class FrmMarkup extends Formulario {
 
 	private void atribuir() {
 		try {
-			txtSigla.setValue(entidade.getSigla());
-			txtValor.setValue(entidade.getValor());
-			txtSigla.requestFocus();
+			txtDescr.setValue(entidade.getDescr());
+			txtDescr.requestFocus();
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(null, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
 		}
 	}
 
 	private void criar() {
-		entidade = new Markup();
+		entidade = new Categoria();
 		atribuir();
 	}
 
 	private void salvar() {
 		try {
-			entidade.setSigla(txtSigla.getText());
-			entidade.setValor(BigDecimal.valueOf(txtValor.getDouble()));
+			entidade.setDescr(txtDescr.getText());
 
-			if (entidade.getSigla() == null || entidade.getSigla().isEmpty() || entidade.getValor() == null
-					|| entidade.getValor().equals(BigDecimal.ZERO)) {
+			if (entidade.getDescr() == null || entidade.getDescr().isEmpty()) {
 				SSMensagem.avisa("Dados incompletos");
 				return;
 			}
@@ -152,5 +137,6 @@ public class FrmMarkup extends Formulario {
 	private void sair() {
 		super.fechar();
 	}
+
 
 }

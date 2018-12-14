@@ -26,7 +26,6 @@ public class Context {
 	}
 
 	static void imprimir(List lista) {
-		System.out.println("aui");
 		for (Object item : lista) {
 			System.out.println(item);
 		}

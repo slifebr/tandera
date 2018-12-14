@@ -30,6 +30,8 @@ public class FrmPessoa extends Formulario {
 
 	private Pessoa entidade;
 
+
+
 	private SSCampoTexto txtNome = new SSCampoTexto();
 	private SSCampoTexto txtCpf = new SSCampoTexto();
 	private SSCampoTexto txtEndereco = new SSCampoTexto();
@@ -164,6 +166,10 @@ public class FrmPessoa extends Formulario {
 		else
 			criar();
 	}
+	
+	public Pessoa getEntidade() {
+		return entidade;
+	}	
 
 	private void atribuir() {
 		try {
